@@ -7,11 +7,12 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, HasRoles;
 
     /**
      * The attributes that are mass assignable.
@@ -46,4 +47,39 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function assignedOrders()
+{
+    return $this->hasMany(Order::class,'designer_id');
+}
+
+public function completedOrders()
+{
+    return $this->hasMany(Order::class, 'designer_id')
+        ->where('status', 'Completed');
+}
+
+public function pendingApprovalOrders()
+{
+    return $this->hasMany(Order::class, 'designer_id')
+        ->where('status', 'Pending Approval');
+}
+
+
+public function photoOrders()
+{
+    return $this->hasMany(Order::class, 'cameraman_id');
+}
+
+public function uploadedDesigns()
+{
+    return $this->hasMany(DesignFile::class, 'uploaded_by');
+}
+
+public function notifications()
+{
+    return $this->hasMany(Notification::class);
+}
+
+
 }
