@@ -23,7 +23,15 @@ class OrderController extends Controller
 
     $sort = $request->get('sort', 'created_at');
 
-    $direction = $request->get('direction', 'desc');
+    $direction = strtolower($request->get('direction', 'desc'));
+
+    $sort = in_array($sort, ['created_at', 'due_date', 'customer', 'status'], true)
+        ? $sort
+        : 'created_at';
+
+    $direction = in_array($direction, ['asc', 'desc'], true)
+        ? $direction
+        : 'desc';
 
 
     $query = Order::with(['customer', 'items'])
@@ -220,7 +228,15 @@ return view('orders.index', compact(
 
         'customer_id' => 'required|exists:customers,id',
 
-        'designer_id' => 'nullable|exists:users,id',
+        'designer_id' => [
+            'nullable',
+            'exists:users,id',
+            function ($attribute, $value, $fail) {
+                if ($value && !User::role('designer')->whereKey($value)->exists()) {
+                    $fail('The selected user must be a designer.');
+                }
+            },
+        ],
 
         'due_date' => 'required|date',
 
@@ -570,8 +586,15 @@ return view('orders.index', compact(
         'customer_id' =>
             'required|exists:customers,id',
 
-        'designer_id' =>
-            'nullable|exists:users,id',
+        'designer_id' => [
+            'nullable',
+            'exists:users,id',
+            function ($attribute, $value, $fail) {
+                if ($value && !User::role('designer')->whereKey($value)->exists()) {
+                    $fail('The selected user must be a designer.');
+                }
+            },
+        ],
 
         'due_date' =>
             'required|date',
@@ -985,7 +1008,15 @@ public function assignCameraman(Request $request, Order $order)
 
     $request->validate([
 
-        'cameraman_id' => 'required|exists:users,id',
+        'cameraman_id' => [
+            'required',
+            'exists:users,id',
+            function ($attribute, $value, $fail) {
+                if (!User::role('cameraman')->whereKey($value)->exists()) {
+                    $fail('The selected user must be a cameraman.');
+                }
+            },
+        ],
 
     ]);
 
@@ -1015,14 +1046,14 @@ public function assignCameraman(Request $request, Order $order)
 
 public function dispatchDelivery(Order $order)
 {
-    if ($order->status != 'Photo Completed') {
+    if (!in_array($order->status, ['Ready at HQ', 'Photo Session', 'Photo Completed'])) {
 
-    return back()->with(
-        'error',
-        'Photo session has not been completed.'
-    );
+        return back()->with(
+            'error',
+            'Order is not ready for delivery.'
+        );
 
-}
+    }
 
     $order->update([
         'status' => 'Out for Delivery',
@@ -1040,11 +1071,11 @@ public function dispatchDelivery(Order $order)
 
 public function readyForPickup(Order $order)
 {
-    if ($order->status != 'Photo Completed') {
+    if (!in_array($order->status, ['Ready at HQ', 'Photo Session', 'Photo Completed'])) {
 
         return back()->with(
             'error',
-            'Photo session has not been completed.'
+            'Order is not ready for pickup.'
         );
 
     }

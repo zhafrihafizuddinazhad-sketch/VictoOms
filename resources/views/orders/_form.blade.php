@@ -758,7 +758,7 @@ Need owner approval">{{ old(
         id="reference_files"
         class="d-none"
         multiple
-        accept=".jpg,.jpeg,.png,.pdf,.ai,.eps,.svg,.psd,.cdr,.otf,.ttf"
+        accept=".jpg,.jpeg,.png,.gif,.webp,.pdf,.doc,.docx,.txt,.rtf,.xls,.xlsx,.csv,.ppt,.pptx,.ai,.eps,.svg,.psd,.cdr,.otf,.ttf"
     >
 
 

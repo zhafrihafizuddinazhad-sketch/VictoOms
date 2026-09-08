@@ -529,43 +529,46 @@
 
                                     $statusClass = match($order->status) {
 
-                                        'Pending' =>
-                                            'secondary',
+    'Pending' =>
+        'secondary',
 
-                                        'Assigned' =>
-                                            'info',
+    'Assigned' =>
+        'info',
 
-                                        'In Progress' =>
-                                            'primary',
+    'In Progress' =>
+        'primary',
 
-                                        'Pending Approval' =>
-                                            'warning',
+    'Pending Approval' =>
+        'warning',
 
-                                        'Printing' =>
-                                            'dark',
+    'Printing' =>
+        'dark',
 
-                                        'Ready at HQ' =>
-                                            'success',
+    'Ready at HQ' =>
+        'warning',
 
-                                        'Photo Session' =>
-                                            'info',
+    'Need Cameraman' =>
+        'danger',
 
-                                        'Photo Completed' =>
-                                            'success',
+    'Photo Session' =>
+        'info',
 
-                                        'Out for Delivery' =>
-                                            'primary',
+    'Photo Completed' =>
+        'primary',
 
-                                        'Waiting for Pickup' =>
-                                            'warning',
+    'Out for Delivery' =>
+        'primary',
 
-                                        'Completed' =>
-                                            'success',
+    'Waiting for Pickup' =>
+        'warning',
 
-                                        default =>
-                                            'secondary',
+    'Completed' =>
+        'success',
 
-                                    };
+    default =>
+        'secondary',
+
+};
 
                                 @endphp
 
@@ -577,6 +580,36 @@
                                     {{ $order->status }}
 
                                 </span>
+
+                                @if($order->status == 'Ready at HQ')
+
+    @if(!$order->cameraman_id)
+
+        <br>
+
+        <span class="badge badge-danger mt-1">
+
+            <i class="fas fa-user-clock"></i>
+
+            Need Cameraman
+
+        </span>
+
+    @else
+
+        <br>
+
+        <span class="badge badge-success mt-1">
+
+            <i class="fas fa-camera"></i>
+
+            {{ $order->cameraman->name }}
+
+        </span>
+
+    @endif
+
+@endif
 
                             </td>
 

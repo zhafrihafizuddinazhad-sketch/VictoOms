@@ -173,66 +173,6 @@ public function submitForApproval(Order $order)
 
     /*
     |--------------------------------------------------------------------------
-    | Make sure a Job Order exists
-    |--------------------------------------------------------------------------
-    */
-
-    if (!$order->jobOrders()->exists()) {
-
-        return back()->with(
-            'error',
-            'Please create a Job Order before submitting for approval.'
-        );
-
-    }
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Design Requirement
-    |--------------------------------------------------------------------------
-    |
-    | Same Design:
-    | No new design file is required because the original design
-    | is being reused.
-    |
-    | Minor Changes / Normal Order:
-    | At least one design file must exist.
-    |
-    */
-
-    if (
-    !$order->is_repeat_order ||
-    $order->repeat_type === 'minor_changes'
-) {
-
-    if ($order->designFiles()->count() == 0) {
-
-        if (
-            $order->is_repeat_order &&
-            $order->repeat_type === 'minor_changes'
-        ) {
-
-            return back()->with(
-                'error',
-                'Please upload the revised design before submitting this Minor Changes order for approval.'
-            );
-
-        }
-
-
-        return back()->with(
-            'error',
-            'Please upload at least one design before submitting.'
-        );
-
-    }
-
-}
-
-
-    /*
-    |--------------------------------------------------------------------------
     | Submit For Owner Approval
     |--------------------------------------------------------------------------
     */

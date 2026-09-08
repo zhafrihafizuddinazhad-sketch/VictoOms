@@ -277,197 +277,288 @@
             </form>
 
 
-        {{-- ================================================= --}}
-        {{-- READY AT HQ --}}
-        {{-- ================================================= --}}
+       {{-- ================================================= --}}
+{{-- READY AT HQ --}}
+{{-- ================================================= --}}
 
-        @elseif($order->status == 'Ready at HQ')
+@elseif($order->status == 'Ready at HQ')
 
+    {{-- ASSIGN CAMERAMAN --}}
+    @if(!$order->cameraman_id)
 
-            @if(!$order->cameraman_id)
+        <div class="card border-danger mb-3">
 
-                <div class="card border-danger">
-
-                    <div class="card-header bg-danger text-white">
-
-                        <strong>
-
-                            Assign Cameraman
-
-                        </strong>
-
-                    </div>
-
-
-                    <div class="card-body">
-
-                        <div class="alert alert-warning">
-
-                            This order is ready at HQ but no cameraman
-                            has been assigned yet.
-
-                        </div>
-
-
-                        <form
-                            action="{{ route('orders.assignCameraman', $order) }}"
-                            method="POST"
-                        >
-
-                            @csrf
-
-                            @method('PATCH')
-
-
-                            <div class="mb-3">
-
-                                <label>
-
-                                    Select Cameraman
-
-                                </label>
-
-
-                                <select
-                                    name="cameraman_id"
-                                    class="form-control"
-                                    required
-                                >
-
-                                    <option value="">
-
-                                        -- Select Cameraman --
-
-                                    </option>
-
-
-                                    @foreach($cameramen as $cameraman)
-
-                                        <option value="{{ $cameraman->id }}">
-
-                                            {{ $cameraman->name }}
-
-                                        </option>
-
-                                    @endforeach
-
-                                </select>
-
-                            </div>
-
-
-                            <button class="btn btn-primary">
-
-                                <i class="fas fa-camera"></i>
-
-                                Assign Cameraman
-
-                            </button>
-
-                        </form>
-
-                    </div>
-
-                </div>
-
-
-            @else
-
-                <div class="alert alert-success">
-
-                    <i class="fas fa-camera"></i>
-
-                    Cameraman Assigned:
-
-                    <strong>
-
-                        {{ $order->cameraman->name }}
-
-                    </strong>
-
-                </div>
-
-            @endif
-
-
-        {{-- ================================================= --}}
-        {{-- PHOTO SESSION --}}
-        {{-- ================================================= --}}
-
-        @elseif($order->status == 'Photo Session')
-
-
-            <div class="alert alert-info mb-0">
-
-                <i class="fas fa-camera-retro"></i>
+            <div class="card-header bg-danger text-white">
 
                 <strong>
 
-                    Photo Session in Progress.
+                    Assign Cameraman
 
                 </strong>
-
-                Waiting for cameraman to complete the photo session.
 
             </div>
 
 
-        {{-- ================================================= --}}
-        {{-- PHOTO COMPLETED --}}
-        {{-- ================================================= --}}
+            <div class="card-body">
 
-        @elseif($order->status == 'Photo Completed')
+                <div class="alert alert-warning">
 
+                    This order is ready at HQ but no cameraman
+                    has been assigned yet.
 
-            @if($order->delivery_method == 'Delivery')
+                </div>
 
 
                 <form
-                    action="{{ route('orders.dispatch', $order) }}"
+                    action="{{ route('orders.assignCameraman', $order) }}"
                     method="POST"
                 >
 
                     @csrf
 
                     @method('PATCH')
+
+
+                    <div class="mb-3">
+
+                        <label>
+
+                            Select Cameraman
+
+                        </label>
+
+
+                        <select
+                            name="cameraman_id"
+                            class="form-control"
+                            required
+                        >
+
+                            <option value="">
+
+                                -- Select Cameraman --
+
+                            </option>
+
+
+                            @foreach($cameramen as $cameraman)
+
+                                <option value="{{ $cameraman->id }}">
+
+                                    {{ $cameraman->name }}
+
+                                </option>
+
+                            @endforeach
+
+                        </select>
+
+                    </div>
 
 
                     <button class="btn btn-primary">
 
-                        <i class="fas fa-truck"></i>
+                        <i class="fas fa-camera"></i>
 
-                        Dispatch Delivery
-
-                    </button>
-
-                </form>
-
-
-            @else
-
-
-                <form
-                    action="{{ route('orders.readyPickup', $order) }}"
-                    method="POST"
-                >
-
-                    @csrf
-
-                    @method('PATCH')
-
-
-                    <button class="btn btn-success">
-
-                        <i class="fas fa-box-open"></i>
-
-                        Ready for Pickup
+                        Assign Cameraman
 
                     </button>
 
                 </form>
 
+            </div>
 
-            @endif
+        </div>
+
+
+    @else
+
+        <div class="alert alert-success mb-3">
+
+            <i class="fas fa-camera"></i>
+
+            Cameraman Assigned:
+
+            <strong>
+
+                {{ $order->cameraman->name }}
+
+            </strong>
+
+        </div>
+
+    @endif
+
+
+    {{-- DELIVERY / PICKUP --}}
+    @if($order->delivery_method == 'Delivery')
+
+        <form
+            action="{{ route('orders.dispatch', $order) }}"
+            method="POST"
+        >
+
+            @csrf
+
+            @method('PATCH')
+
+
+            <button class="btn btn-primary">
+
+                <i class="fas fa-truck"></i>
+
+                Dispatch Delivery
+
+            </button>
+
+        </form>
+
+    @else
+
+        <form
+            action="{{ route('orders.readyPickup', $order) }}"
+            method="POST"
+        >
+
+            @csrf
+
+            @method('PATCH')
+
+
+            <button class="btn btn-success">
+
+                <i class="fas fa-box-open"></i>
+
+                Ready for Pickup
+
+            </button>
+
+        </form>
+
+    @endif
+
+
+{{-- ================================================= --}}
+{{-- PHOTO SESSION --}}
+{{-- ================================================= --}}
+
+@elseif($order->status == 'Photo Session')
+
+    <div class="alert alert-info mb-3">
+
+        <i class="fas fa-camera-retro"></i>
+
+        <strong>
+
+            Photo Session in Progress.
+
+        </strong>
+
+        Waiting for cameraman to complete the photo session.
+
+    </div>
+
+
+    {{-- DELIVERY / PICKUP --}}
+    @if($order->delivery_method == 'Delivery')
+
+        <form
+            action="{{ route('orders.dispatch', $order) }}"
+            method="POST"
+        >
+
+            @csrf
+
+            @method('PATCH')
+
+
+            <button class="btn btn-primary">
+
+                <i class="fas fa-truck"></i>
+
+                Dispatch Delivery
+
+            </button>
+
+        </form>
+
+    @else
+
+        <form
+            action="{{ route('orders.readyPickup', $order) }}"
+            method="POST"
+        >
+
+            @csrf
+
+            @method('PATCH')
+
+
+            <button class="btn btn-success">
+
+                <i class="fas fa-box-open"></i>
+
+                Ready for Pickup
+
+            </button>
+
+        </form>
+
+    @endif
+
+
+{{-- ================================================= --}}
+{{-- PHOTO COMPLETED --}}
+{{-- ================================================= --}}
+
+@elseif($order->status == 'Photo Completed')
+
+    {{-- DELIVERY / PICKUP --}}
+    @if($order->delivery_method == 'Delivery')
+
+        <form
+            action="{{ route('orders.dispatch', $order) }}"
+            method="POST"
+        >
+
+            @csrf
+
+            @method('PATCH')
+
+
+            <button class="btn btn-primary">
+
+                <i class="fas fa-truck"></i>
+
+                Dispatch Delivery
+
+            </button>
+
+        </form>
+
+    @else
+
+        <form
+            action="{{ route('orders.readyPickup', $order) }}"
+            method="POST"
+        >
+
+            @csrf
+
+            @method('PATCH')
+
+
+            <button class="btn btn-success">
+
+                <i class="fas fa-box-open"></i>
+
+                Ready for Pickup
+
+            </button>
+
+        </form>
+
+    @endif
 
 
         {{-- ================================================= --}}

@@ -10,6 +10,8 @@ class OrderReference extends Model
 
     'order_id',
     'uploaded_by',
+    'title',
+    'description',
     'reference_link',
     'file_name',
     'file_path',

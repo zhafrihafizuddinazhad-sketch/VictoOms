@@ -30,7 +30,11 @@
 
 @include('orders.partials.uploaded-designs')
 
-@include('orders.partials.job-orders')
+@if(auth()->user()->hasRole('designer'))
+
+    @include('orders.partials.job-orders')
+
+@endif
 
 @include('orders.partials.product-photos')
 

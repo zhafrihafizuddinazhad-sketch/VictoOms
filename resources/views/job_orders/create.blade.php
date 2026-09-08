@@ -24,9 +24,9 @@
 
 
     <a
-        href="{{ route('orders.show', $order) }}"
-        class="btn btn-secondary"
-    >
+    href="{{ route('designer.task.show', $order) }}"
+    class="btn btn-secondary"
+>
 
         <i class="fas fa-arrow-left"></i>
 
@@ -466,9 +466,9 @@
             <div class="d-flex justify-content-end">
 
                 <a
-                    href="{{ route('orders.show', $order) }}"
-                    class="btn btn-secondary mr-2"
-                >
+    href="{{ route('designer.task.show', $order) }}"
+    class="btn btn-secondary mr-2"
+>
 
                     <i class="fas fa-times"></i>
 

@@ -11,6 +11,8 @@ class DesignFileController extends Controller
 {
    public function store(Request $request, Order $order)
 {
+    abort_unless($order->designer_id === auth()->id(), 403);
+
     /*
     |--------------------------------------------------------------------------
     | Check Order Status
@@ -82,6 +84,12 @@ class DesignFileController extends Controller
         'jpeg',
         'png',
         'pdf',
+        'doc',
+        'docx',
+        'xls',
+        'xlsx',
+        'ppt',
+        'pptx',
         'ai',
         'eps',
         'svg',
@@ -127,18 +135,18 @@ class DesignFileController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | Maximum 50MB Per File
+        | Maximum 500MB Per File
         |--------------------------------------------------------------------------
         */
 
-        if ($file->getSize() > 50 * 1024 * 1024) {
+        if ($file->getSize() > 500 * 1024 * 1024) {
 
             return back()
                 ->withInput()
                 ->with(
                     'error',
                     $file->getClientOriginalName() .
-                    ' exceeds the 50MB file size limit.'
+                    ' exceeds the 500MB file size limit.'
                 );
 
         }
@@ -239,6 +247,8 @@ class DesignFileController extends Controller
 {
     $order = $designFile->order;
 
+    abort_unless($order->designer_id === auth()->id(), 403);
+
 
     /*
     |--------------------------------------------------------------------------
@@ -316,6 +326,14 @@ class DesignFileController extends Controller
 
     public function download(DesignFile $designFile)
 {
+    $user = auth()->user();
+
+    if ($user->hasRole('designer')) {
+        abort_unless($designFile->order->designer_id === $user->id, 403);
+    } else {
+        abort_unless($user->hasAnyRole(['owner', 'admin']), 403);
+    }
+
     // Owner/Admin boleh download design selepas design mula dikerjakan
     if (!auth()->user()->hasRole('designer')) {
 
@@ -355,6 +373,14 @@ class DesignFileController extends Controller
 
 public function preview(DesignFile $designFile)
 {
+    $user = auth()->user();
+
+    if ($user->hasRole('designer')) {
+        abort_unless($designFile->order->designer_id === $user->id, 403);
+    } else {
+        abort_unless($user->hasAnyRole(['owner', 'admin']), 403);
+    }
+
     // Owner/Admin boleh preview design selepas design mula dikerjakan
     if (!auth()->user()->hasRole('designer')) {
 

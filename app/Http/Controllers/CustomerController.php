@@ -15,7 +15,15 @@ class CustomerController extends Controller
     $search = $request->search;
 
     $sort = $request->get('sort', 'customer_name');
-    $direction = $request->get('direction', 'asc');
+    $direction = strtolower($request->get('direction', 'asc'));
+
+    $sort = in_array($sort, ['customer_name', 'phone', 'company', 'created_at'], true)
+        ? $sort
+        : 'customer_name';
+
+    $direction = in_array($direction, ['asc', 'desc'], true)
+        ? $direction
+        : 'asc';
 
     $customers = Customer::when($search, function ($query) use ($search) {
 

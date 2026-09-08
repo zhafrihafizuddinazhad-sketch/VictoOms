@@ -7,6 +7,10 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (DB::getDriverName() === 'sqlite') {
+            return;
+        }
+
         // Tukar data lama dulu
         DB::statement("
             UPDATE orders
@@ -38,6 +42,10 @@ return new class extends Migration
 
     public function down(): void
     {
+        if (DB::getDriverName() === 'sqlite') {
+            return;
+        }
+
         // Tukar balik data
         DB::statement("
             UPDATE orders

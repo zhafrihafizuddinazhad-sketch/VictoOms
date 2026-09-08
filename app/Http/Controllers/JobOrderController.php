@@ -22,6 +22,8 @@ class JobOrderController extends Controller
 
     public function create(Order $order)
     {
+        abort_unless($order->designer_id === auth()->id(), 403);
+
         $order->load([
             'customer',
             'items',
@@ -44,6 +46,12 @@ class JobOrderController extends Controller
         Request $request,
         Order $order
     ) {
+
+        abort_unless($order->designer_id === auth()->id(), 403);
+
+        if ($order->status !== 'In Progress') {
+            return back()->with('error', 'A Job Order can only be created while the design task is in progress.');
+        }
 
         $validated = $request->validate([
 
@@ -407,6 +415,14 @@ public function destroy(JobOrder $jobOrder)
 public function generateWord(
     JobOrder $jobOrder
 ) {
+
+    $user = auth()->user();
+
+    if ($user->hasRole('designer')) {
+        abort_unless($jobOrder->order->designer_id === $user->id, 403);
+    } else {
+        abort_unless($user->hasAnyRole(['owner', 'admin']), 403);
+    }
 
     $jobOrder->load([
         'order.customer',

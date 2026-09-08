@@ -4,32 +4,18 @@
 {{-- ================================================= --}}
 
 <div class="card mt-3">
+<div class="card-header">
 
-    <div class="card-header d-flex justify-content-between align-items-center">
+    <h5 class="mb-0">
 
-        <h4 class="mb-0">
+        <i class="fas fa-file-alt"></i>
 
-            <i class="fas fa-file-alt"></i>
+        Job Orders
 
-            Job Orders
+    </h5>
 
-        </h4>
+</div>
 
-
-        @if(auth()->user()->hasRole('designer'))
-
-    <a
-        href="{{ route('job-orders.create', $order) }}"
-        class="btn btn-primary btn-sm">
-
-        <i class="fas fa-plus"></i>
-        Create Job Order
-
-    </a>
-
-@endif
-
-    </div>
 
 
     <div class="card-body">
@@ -256,4 +242,18 @@
 
     </div>
 
+    <div class="mt-3 pt-3 border-top text-right">
+
+    <a
+        href="{{ route('job-orders.create', $order) }}"
+        class="btn btn-outline-secondary btn-sm"
+    >
+
+        <i class="fas fa-plus"></i>
+
+        Create Job Order
+
+    </a>
+
+</div>
 </div>

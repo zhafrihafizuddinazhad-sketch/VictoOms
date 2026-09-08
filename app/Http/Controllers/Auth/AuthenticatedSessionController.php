@@ -47,7 +47,7 @@ class AuthenticatedSessionController extends Controller
     return redirect()->route('cameraman.dashboard');
 }
 
-    return redirect('/');
+    return redirect()->route('dashboard');
 }
 
     /**

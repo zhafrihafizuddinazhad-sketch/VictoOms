@@ -1274,229 +1274,6 @@ $daysLeft = max(
 
             </div>
 
-{{-- ================================================= --}}
-{{-- JOB ORDERS --}}
-{{-- ================================================= --}}
-
-<div class="card mb-4">
-
-    <div class="card-header d-flex justify-content-between align-items-center">
-
-        <strong>
-
-            <i class="fas fa-clipboard-list mr-1"></i>
-
-            Job Orders
-
-        </strong>
-
-
-        @if(
-            $order->status === 'In Progress' ||
-            $order->status === 'Assigned'
-        )
-
-            <a
-                href="{{ route(
-                    'job-orders.create',
-                    $order
-                ) }}"
-                class="btn btn-primary btn-sm">
-
-                <i class="fas fa-plus"></i>
-
-                Create Job Order
-
-            </a>
-
-        @endif
-
-    </div>
-
-
-    <div class="card-body">
-
-
-        @if($order->jobOrders->count())
-
-            <div class="table-responsive">
-
-                <table class="table table-bordered table-hover">
-
-                    <thead class="table-light">
-
-                        <tr>
-
-                            <th>
-
-                                Job Order No
-
-                            </th>
-
-                            <th>
-
-                                Created By
-
-                            </th>
-
-                            <th>
-
-                                Status
-
-                            </th>
-
-                            <th>
-
-                                Created At
-
-                            </th>
-
-                            <th width="150">
-
-                                Action
-
-                            </th>
-
-                        </tr>
-
-                    </thead>
-
-
-                    <tbody>
-
-                        @foreach(
-                            $order->jobOrders->sortByDesc('created_at')
-                            as $jobOrder
-                        )
-
-                            <tr>
-
-                                <td>
-
-                                    <strong>
-
-                                        {{ $jobOrder->job_order_no }}
-
-                                    </strong>
-
-                                </td>
-
-
-                                <td>
-
-                                    {{ $jobOrder->creator->name ?? '-' }}
-
-                                </td>
-
-
-                                <td>
-
-                                    @if($jobOrder->status === 'Draft')
-
-                                        <span class="badge bg-warning text-dark">
-
-                                            Draft
-
-                                        </span>
-
-                                    @else
-
-                                        <span class="badge bg-success">
-
-                                            {{ $jobOrder->status }}
-
-                                        </span>
-
-                                    @endif
-
-                                </td>
-
-
-                                <td>
-
-                                    {{ $jobOrder->created_at
-                                        ->format('d M Y h:i A') }}
-
-                                </td>
-
-
-                                <td>
-
-    <a
-        href="{{ route(
-            'job-orders.generate-word',
-            $jobOrder
-        ) }}"
-        class="btn btn-success btn-sm">
-
-        <i class="fas fa-file-word"></i>
-
-        Word
-
-    </a>
-
-
-    @if(
-        auth()->user()->hasRole('designer') &&
-        $jobOrder->created_by == auth()->id() &&
-        $jobOrder->status === 'Draft'
-    )
-
-        <form
-            action="{{ route(
-                'job-orders.destroy',
-                $jobOrder
-            ) }}"
-            method="POST"
-            class="d-inline">
-
-            @csrf
-
-            @method('DELETE')
-
-
-            <button
-                type="submit"
-                class="btn btn-danger btn-sm"
-                onclick="return confirm(
-                    'Are you sure you want to delete this Job Order? This action cannot be undone.'
-                )">
-
-                <i class="fas fa-trash"></i>
-
-                Delete
-
-            </button>
-
-        </form>
-
-    @endif
-
-</td>
-
-                            </tr>
-
-                        @endforeach
-
-                    </tbody>
-
-                </table>
-
-            </div>
-
-        @else
-
-            <div class="alert alert-secondary mb-0">
-
-                <i class="fas fa-info-circle mr-1"></i>
-
-                No Job Order has been created for this order yet.
-
-            </div>
-
-        @endif
-
-    </div>
 
 </div>
 
@@ -1660,13 +1437,8 @@ $daysLeft = max(
             {{-- Normal Order = upload --}}
             
 
-            @if(
-                $order->status == 'In Progress' &&
-                (
-                    !$order->is_repeat_order ||
-                    $order->repeat_type === 'minor_changes'
-                )
-            )
+            @if($order->status == 'In Progress')
+            
 
                 <div class="card mb-4">
 
@@ -1757,7 +1529,7 @@ $daysLeft = max(
             id="design_file"
             class="d-none"
             multiple
-            accept=".jpg,.jpeg,.png,.pdf,.ai,.eps,.svg,.psd,.cdr,.otf,.ttf"
+            accept=".jpg,.jpeg,.png,.gif,.webp,.pdf,.doc,.docx,.txt,.rtf,.xls,.xlsx,.csv,.ppt,.pptx,.ai,.eps,.svg,.psd,.cdr,.otf,.ttf"
         >
 
 
@@ -2247,6 +2019,228 @@ $daysLeft = max(
 
 </div>
 
+{{-- ================================================= --}}
+{{-- JOB ORDERS --}}
+{{-- ================================================= --}}
+
+<div class="card mb-4">
+
+    <div class="card-header">
+
+    <strong>
+
+        <i class="fas fa-clipboard-list mr-1"></i>
+
+        Job Orders
+
+    </strong>
+
+</div>
+
+
+    <div class="card-body">
+
+
+        @if($order->jobOrders->count())
+
+            <div class="table-responsive">
+
+                <table class="table table-bordered table-hover">
+
+                    <thead class="table-light">
+
+                        <tr>
+
+                            <th>
+
+                                Job Order No
+
+                            </th>
+
+                            <th>
+
+                                Created By
+
+                            </th>
+
+                            <th>
+
+                                Status
+
+                            </th>
+
+                            <th>
+
+                                Created At
+
+                            </th>
+
+                            <th width="150">
+
+                                Action
+
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                        @foreach(
+                            $order->jobOrders->sortByDesc('created_at')
+                            as $jobOrder
+                        )
+
+                            <tr>
+
+                                <td>
+
+                                    <strong>
+
+                                        {{ $jobOrder->job_order_no }}
+
+                                    </strong>
+
+                                </td>
+
+
+                                <td>
+
+                                    {{ $jobOrder->creator->name ?? '-' }}
+
+                                </td>
+
+
+                                <td>
+
+                                    @if($jobOrder->status === 'Draft')
+
+                                        <span class="badge bg-warning text-dark">
+
+                                            Draft
+
+                                        </span>
+
+                                    @else
+
+                                        <span class="badge bg-success">
+
+                                            {{ $jobOrder->status }}
+
+                                        </span>
+
+                                    @endif
+
+                                </td>
+
+
+                                <td>
+
+                                    {{ $jobOrder->created_at
+                                        ->format('d M Y h:i A') }}
+
+                                </td>
+
+
+                                <td>
+
+    <a
+        href="{{ route(
+            'job-orders.generate-word',
+            $jobOrder
+        ) }}"
+        class="btn btn-success btn-sm">
+
+        <i class="fas fa-file-word"></i>
+
+        Word
+
+    </a>
+
+
+    @if(
+        auth()->user()->hasRole('designer') &&
+        $jobOrder->created_by == auth()->id() &&
+        $jobOrder->status === 'Draft'
+    )
+
+        <form
+            action="{{ route(
+                'job-orders.destroy',
+                $jobOrder
+            ) }}"
+            method="POST"
+            class="d-inline">
+
+            @csrf
+
+            @method('DELETE')
+
+
+            <button
+                type="submit"
+                class="btn btn-danger btn-sm"
+                onclick="return confirm(
+                    'Are you sure you want to delete this Job Order? This action cannot be undone.'
+                )">
+
+                <i class="fas fa-trash"></i>
+
+                Delete
+
+            </button>
+
+        </form>
+
+    @endif
+
+</td>
+
+                            </tr>
+
+                        @endforeach
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        @else
+
+            <div class="alert alert-secondary mb-0">
+
+                <i class="fas fa-info-circle mr-1"></i>
+
+                No Job Order has been created for this order yet.
+
+            </div>
+
+        @endif
+<div class="mt-3 pt-3 border-top text-right">
+
+    @if(
+        $order->status === 'In Progress' ||
+        $order->status === 'Assigned'
+    )
+
+        <a
+            href="{{ route('job-orders.create', $order) }}"
+            class="btn btn-outline-secondary btn-sm"
+        >
+
+            <i class="fas fa-plus"></i>
+
+            Create Job Order
+
+        </a>
+
+    @endif
+
+</div>
+    </div>
 <script>
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -2277,6 +2271,15 @@ document.addEventListener('DOMContentLoaded', function () {
         'jpeg',
         'png',
         'pdf',
+        'doc',
+        'docx',
+        'txt',
+        'rtf',
+        'xls',
+        'xlsx',
+        'csv',
+        'ppt',
+        'pptx',
         'ai',
         'eps',
         'svg',

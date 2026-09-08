@@ -24,6 +24,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\JobOrderController;
 use App\Http\Controllers\CameramanMonitoringController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\ProfileController;
 
 
 /*
@@ -71,6 +72,18 @@ Route::get('/', function () {
 
     return redirect()->route('login');
 
+});
+
+// Kept as the neutral post-authentication destination used by Laravel's
+// verification flow. The root route then sends each role to its own dashboard.
+Route::get('/dashboard', function () {
+    return redirect('/');
+})->middleware('auth')->name('dashboard');
+
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
 
@@ -639,13 +652,13 @@ Route::middleware(['auth'])->group(function () {
     Route::resource(
         'products',
         ProductController::class
-    )->except(['show']);
+    )->except(['show'])->middleware('role:owner|admin');
 
 
     Route::patch(
         '/products/{product}/toggle',
         [ProductController::class, 'toggle']
-    )->name('products.toggle');
+    )->middleware('role:owner|admin')->name('products.toggle');
 
 
     /*

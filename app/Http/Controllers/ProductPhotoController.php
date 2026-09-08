@@ -11,7 +11,14 @@ class ProductPhotoController extends Controller
 {
     public function store(Request $request, Order $order)
     {
+        abort_unless($order->cameraman_id === auth()->id(), 403);
+
+        if ($order->status !== 'Photo Session') {
+            return back()->with('error', 'Photos can only be uploaded during an active photo session.');
+        }
+
         $request->validate([
+            'photos' => 'required|array|min:1',
             'photos.*' => 'required|image|max:5120',
             'remarks' => 'nullable|string'
         ]);
@@ -37,6 +44,8 @@ class ProductPhotoController extends Controller
 
     public function destroy(ProductPhoto $photo)
 {
+    abort_unless($photo->order->cameraman_id === auth()->id(), 403);
+
     // Jangan bagi delete kalau photo session dah complete
     if ($photo->order->status != 'Photo Session') {
 
