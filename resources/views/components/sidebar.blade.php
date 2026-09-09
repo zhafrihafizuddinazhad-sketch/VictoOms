@@ -20,6 +20,7 @@
             class="brand-link"
         >
 
+            <img src="{{ asset('images/victo-logo.png') }}" alt="Victo" class="brand-logo-img" aria-hidden="true">
             <span class="brand-text font-weight-light">
 
                 Victo OMS
@@ -40,6 +41,7 @@
             class="brand-link"
         >
 
+            <img src="{{ asset('images/victo-logo.png') }}" alt="Victo" class="brand-logo-img" aria-hidden="true">
             <span class="brand-text font-weight-light">
 
                 Victo OMS
@@ -60,6 +62,7 @@
             class="brand-link"
         >
 
+            <img src="{{ asset('images/victo-logo.png') }}" alt="Victo" class="brand-logo-img" aria-hidden="true">
             <span class="brand-text font-weight-light">
 
                 Victo OMS
@@ -80,6 +83,7 @@
             class="brand-link"
         >
 
+            <img src="{{ asset('images/victo-logo.png') }}" alt="Victo" class="brand-logo-img" aria-hidden="true">
             <span class="brand-text font-weight-light">
 
                 Victo OMS
@@ -527,6 +531,16 @@
 
 
                 @endif
+
+                {{-- Shared help --}}
+                <li class="nav-header">HELP</li>
+                <li class="nav-item">
+                    <a href="{{ route('manual') }}"
+                       class="nav-link {{ request()->routeIs('manual') ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-book-open"></i>
+                        <p>User Manual</p>
+                    </a>
+                </li>
 
 
             </ul>

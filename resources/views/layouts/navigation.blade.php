@@ -5,8 +5,10 @@
             <div class="flex">
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center">
-                    <a href="{{ route('dashboard') }}">
-                        <x-application-logo class="block h-9 w-auto fill-current text-gray-800" />
+                    <a href="{{ route('dashboard') }}" class="flex items-center gap-2 font-extrabold tracking-tight text-slate-800">
+                        <img src="{{ asset('images/victo-logo.png') }}" alt="" class="supplied-logo" aria-hidden="true">
+                        <span class="top-brand__mark">V</span>
+                        <span>Victo <b class="text-indigo-600">OMS</b></span>
                     </a>
                 </div>
 

@@ -35,6 +35,21 @@
         <section class="content pt-3">
             <div class="container-fluid">
 
+            <div class="page-masthead">
+                <div class="page-masthead__brand">
+                    <img src="{{ asset('images/victo-logo.png') }}" alt="Victo OMS logo" class="supplied-logo" aria-hidden="true">
+                    <span class="victo-mark" aria-hidden="true"><span>V</span></span>
+                    <div>
+                        <p class="page-masthead__eyebrow">Victo creative studio</p>
+                        <p class="page-masthead__name">Victo <em>OMS</em></p>
+                    </div>
+                </div>
+                <div class="page-masthead__context">
+                    <span class="page-masthead__pulse"></span>
+                    Operations workspace
+                </div>
+            </div>
+
             @if(session('success'))
 
     <div class="alert alert-success alert-dismissible fade show">

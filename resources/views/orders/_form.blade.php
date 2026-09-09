@@ -997,8 +997,7 @@ Need owner approval">{{ old(
                                             'quantity.' . $index,
                                             $item->quantity
                                         ) }}"
-                                        min="1"
-                                        required>
+                                        min="1">
 
                                 </td>
 
