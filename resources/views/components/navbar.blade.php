@@ -9,7 +9,7 @@
     </ul>
 
     <a href="{{ auth()->user()->hasRole('owner') ? route('owner.dashboard') : (auth()->user()->hasRole('admin') ? route('admin.dashboard') : (auth()->user()->hasRole('designer') ? route('designer.dashboard') : route('cameraman.dashboard'))) }}" class="top-brand" aria-label="Victo OMS home">
-        <img src="{{ asset('images/victo-authentic.png') }}" alt="Victo OMS" class="top-brand__logo">
+        <img src="{{ asset('images/victo-logo.png') }}?v=20260917" alt="Victo OMS" class="top-brand__logo">
     </a>
 
    @php
