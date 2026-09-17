@@ -37,7 +37,7 @@
 
             <div class="page-masthead">
                 <div class="page-masthead__brand">
-                    <img src="{{ asset('images/victo-logo.png') }}" alt="Victo OMS logo" class="page-masthead__logo">
+                    <img src="{{ asset('images/victo-authentic.png') }}" alt="Victo OMS logo" class="page-masthead__logo">
                     <div>
                         <p class="page-masthead__eyebrow">Creative commerce operations</p>
                         <p class="page-masthead__name">Operations <em>workspace</em></p>

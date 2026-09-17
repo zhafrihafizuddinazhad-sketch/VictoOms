@@ -20,7 +20,7 @@
             class="brand-link"
         >
 
-            <img src="{{ asset('images/victo-logo.png') }}" alt="Victo" class="brand-logo-img" aria-hidden="true">
+            <img src="{{ asset('images/victo-authentic.png') }}" alt="Victo" class="brand-logo-img" aria-hidden="true">
             <span class="brand-text font-weight-light">
 
                 Victo OMS
@@ -41,7 +41,7 @@
             class="brand-link"
         >
 
-            <img src="{{ asset('images/victo-logo.png') }}" alt="Victo" class="brand-logo-img" aria-hidden="true">
+            <img src="{{ asset('images/victo-authentic.png') }}" alt="Victo" class="brand-logo-img" aria-hidden="true">
             <span class="brand-text font-weight-light">
 
                 Victo OMS
@@ -62,7 +62,7 @@
             class="brand-link"
         >
 
-            <img src="{{ asset('images/victo-logo.png') }}" alt="Victo" class="brand-logo-img" aria-hidden="true">
+            <img src="{{ asset('images/victo-authentic.png') }}" alt="Victo" class="brand-logo-img" aria-hidden="true">
             <span class="brand-text font-weight-light">
 
                 Victo OMS
@@ -83,7 +83,7 @@
             class="brand-link"
         >
 
-            <img src="{{ asset('images/victo-logo.png') }}" alt="Victo" class="brand-logo-img" aria-hidden="true">
+            <img src="{{ asset('images/victo-authentic.png') }}" alt="Victo" class="brand-logo-img" aria-hidden="true">
             <span class="brand-text font-weight-light">
 
                 Victo OMS

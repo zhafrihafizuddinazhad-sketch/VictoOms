@@ -18,7 +18,7 @@
         <div class="guest-shell flex flex-col sm:justify-center items-center pt-6 sm:pt-0 px-4">
             <div class="flex items-center gap-3">
                 <a href="/">
-                    <img src="{{ asset('images/victo-logo.png') }}" alt="Victo OMS" class="victo-logo w-16 h-16" />
+                    <img src="{{ asset('images/victo-authentic.png') }}" alt="Victo OMS" class="victo-logo w-16 h-16" />
                 </a>
                 <span class="text-xl font-bold tracking-tight text-slate-800">Victo <span class="text-indigo-600">OMS</span></span>
             </div>
