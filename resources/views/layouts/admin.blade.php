@@ -37,11 +37,10 @@
 
             <div class="page-masthead">
                 <div class="page-masthead__brand">
-                    <img src="{{ asset('images/victo-logo.png') }}" alt="Victo OMS logo" class="supplied-logo" aria-hidden="true">
-                    <span class="victo-mark" aria-hidden="true"><span>V</span></span>
+                    <img src="{{ asset('images/victo-logo.png') }}" alt="Victo OMS logo" class="page-masthead__logo">
                     <div>
-                        <p class="page-masthead__eyebrow">Victo creative studio</p>
-                        <p class="page-masthead__name">Victo <em>OMS</em></p>
+                        <p class="page-masthead__eyebrow">Creative commerce operations</p>
+                        <p class="page-masthead__name">Operations <em>workspace</em></p>
                     </div>
                 </div>
                 <div class="page-masthead__context">

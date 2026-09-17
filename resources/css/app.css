@@ -4,16 +4,16 @@
 
 /* Victo OMS design system — shared presentation only; no application behaviour. */
 :root {
-    --victo-ink: #172033;
-    --victo-muted: #6d7788;
-    --victo-canvas: #f5f7fb;
+    --victo-ink: #0b1431;
+    --victo-muted: #69738a;
+    --victo-canvas: #f3f6fc;
     --victo-surface: #ffffff;
     --victo-line: #e7ebf2;
-    --victo-brand: #3457d5;
-    --victo-brand-deep: #263f9d;
-    --victo-accent: #e8b55d;
-    --victo-radius: 14px;
-    --victo-shadow: 0 10px 30px rgba(23, 32, 51, .06);
+    --victo-brand: #143cc9;
+    --victo-brand-deep: #08248d;
+    --victo-accent: #f4be2a;
+    --victo-radius: 16px;
+    --victo-shadow: 0 14px 38px rgba(11, 20, 49, .07);
 }
 
 body.hold-transition,
@@ -23,12 +23,21 @@ body.font-sans {
     font-family: Figtree, Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
+body.hold-transition {
+    position: relative;
+    background:
+        radial-gradient(circle at 100% 0%, rgba(20, 60, 201, .075), transparent 25rem),
+        radial-gradient(circle at 0% 76%, rgba(244, 190, 42, .06), transparent 25rem),
+        var(--victo-canvas);
+}
+
 /* Admin workspace */
 .main-header.navbar {
-    min-height: 70px;
+    min-height: 74px;
     padding: 0 .85rem;
     border: 0;
-    background: rgba(255, 255, 255, .95);
+    background: rgba(255, 255, 255, .88);
+    backdrop-filter: blur(16px);
     box-shadow: 0 1px 0 var(--victo-line);
 }
 
@@ -38,7 +47,7 @@ body.font-sans {
 .top-brand {
     display: flex;
     align-items: center;
-    gap: .5rem;
+    gap: .7rem;
     margin-left: .2rem;
     color: var(--victo-ink);
     font-size: 1rem;
@@ -47,59 +56,30 @@ body.font-sans {
 }
 .top-brand:hover { color: var(--victo-ink); text-decoration: none; }
 .top-brand b, .page-masthead__name em { color: var(--victo-brand); font-style: normal; }
-.top-brand__mark, .victo-mark {
-    display: grid;
-    place-items: center;
-    width: 28px;
-    height: 28px;
-    color: #fff;
-    background: linear-gradient(135deg, #f0c36a, #d89538);
-    border-radius: 9px 9px 9px 2px;
-    box-shadow: 0 5px 12px rgba(216,149,56,.25);
-    font-size: .8rem;
-    font-weight: 900;
-}
+.top-brand__logo { width: 121px; height: 35px; object-fit: contain; object-position: left center; }
 
 .main-sidebar.sidebar-dark-primary {
-    background: linear-gradient(180deg, #172033 0%, #202c45 100%);
+    background:
+        radial-gradient(circle at 115% 7%, rgba(57, 100, 255, .42), transparent 14rem),
+        radial-gradient(circle at -20% 95%, rgba(244, 190, 42, .11), transparent 15rem),
+        linear-gradient(180deg, #071330 0%, #0c1d49 56%, #071330 100%);
     box-shadow: none;
 }
 
 .brand-link {
-    height: 70px;
+    height: 74px;
     display: flex !important;
     align-items: center;
-    gap: .7rem;
+    gap: .78rem;
     padding: 0 1.1rem !important;
     border-bottom: 1px solid rgba(255, 255, 255, .09) !important;
 }
 
-.brand-link::before {
-    content: "V";
-    display: grid;
-    place-items: center;
-    width: 31px;
-    height: 31px;
-    color: #172033;
-    background: var(--victo-accent);
-    border-radius: 9px;
-    font-size: .9rem;
-    font-weight: 800;
-}
+.brand-logo-img { display: block; width: 156px; height: 44px; object-fit: contain; object-position: left center; }
+.victo-logo { object-fit: contain; }
+.supplied-logo { display: block; object-fit: contain; }
 
-/* The supplied mark is kept as the project brand asset.  Its white artwork
-   is intentionally hidden until a non-blank export is supplied; the V mark
-   and wordmark above remain legible on the dark navigation surface. */
-.brand-logo-img,
-.victo-logo,
-.supplied-logo { display: none; }
-
-.brand-text {
-    color: #fff !important;
-    letter-spacing: .04em;
-    font-size: 1.05rem;
-    font-weight: 700 !important;
-}
+.brand-text { display: none; }
 
 .sidebar { padding: .8rem .65rem; }
 .nav-sidebar .nav-header {
@@ -111,42 +91,56 @@ body.font-sans {
 }
 .nav-sidebar > .nav-item { margin-bottom: .23rem; }
 .nav-sidebar .nav-link {
-    border-radius: 9px;
-    color: #c4cddd;
-    padding: .68rem .78rem;
+    border: 1px solid transparent;
+    border-radius: 11px;
+    color: #c7d2e9;
+    padding: .72rem .8rem;
     font-size: .9rem;
 }
-.nav-sidebar .nav-link:hover { color: #fff; background: rgba(255, 255, 255, .08); }
+.nav-sidebar .nav-link:hover { color: #fff; background: rgba(255, 255, 255, .075); border-color: rgba(255,255,255,.07); }
 .nav-sidebar .nav-link.active {
     color: #fff !important;
-    background: var(--victo-brand) !important;
-    box-shadow: 0 5px 13px rgba(0, 0, 0, .16);
+    background: linear-gradient(100deg, #164ae4, #2861f0) !important;
+    box-shadow: 0 9px 18px rgba(1, 16, 69, .34);
 }
 .nav-sidebar .nav-icon { margin-right: .45rem !important; font-size: .95rem !important; }
 
 .content-wrapper {
     min-height: calc(100vh - 70px) !important;
-    background: var(--victo-canvas);
+    background:
+        linear-gradient(110deg, rgba(255,255,255,.58), rgba(243,246,252,.45)),
+        var(--victo-canvas);
 }
 .content { padding: 1.75rem 0 2.5rem !important; }
 .page-masthead {
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    min-height: 94px;
+    min-height: 126px;
     margin: 0 0 1.45rem;
-    padding: 1.25rem 1.4rem;
+    padding: 1.5rem 1.65rem;
     overflow: hidden;
     color: #fff;
     background:
-        radial-gradient(circle at 91% 15%, rgba(232,181,93,.45) 0, transparent 16%),
-        radial-gradient(circle at 82% 100%, rgba(89,117,224,.38) 0, transparent 26%),
-        linear-gradient(118deg, #151e30, #243557);
+        radial-gradient(circle at 94% 4%, rgba(244,190,42,.74) 0, transparent 13%),
+        radial-gradient(circle at 75% 112%, rgba(48,102,255,.8) 0, transparent 29%),
+        linear-gradient(118deg, #061433, #10296a 56%, #0c2070);
     border-radius: 18px;
     box-shadow: 0 14px 34px rgba(23,32,51,.14);
 }
+.page-masthead::before,
+.page-masthead::after {
+    position: absolute;
+    content: "";
+    pointer-events: none;
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 50%;
+}
+.page-masthead::before { width: 220px; height: 220px; right: 12%; top: -142px; animation: victo-drift 11s ease-in-out infinite; }
+.page-masthead::after { width: 130px; height: 130px; right: -30px; bottom: -70px; border-width: 18px; border-color: rgba(255,255,255,.055); animation: victo-drift 14s ease-in-out -4s infinite reverse; }
 .page-masthead__brand { display: flex; align-items: center; gap: .8rem; }
-.page-masthead .victo-mark { width: 42px; height: 42px; font-size: 1.06rem; }
+.page-masthead__logo { position: relative; z-index: 1; width: 160px; height: 52px; object-fit: contain; object-position: left center; }
 .page-masthead__eyebrow {
     margin: 0 0 .13rem;
     color: #b9c7e5;
@@ -157,6 +151,8 @@ body.font-sans {
 }
 .page-masthead__name { margin: 0; font-size: 1.32rem; font-weight: 800; letter-spacing: -.04em; }
 .page-masthead__context {
+    position: relative;
+    z-index: 1;
     display: flex;
     align-items: center;
     gap: .46rem;
@@ -169,6 +165,8 @@ body.font-sans {
     font-weight: 650;
 }
 .page-masthead__pulse { width: 6px; height: 6px; border-radius: 999px; background: #7ee3be; box-shadow: 0 0 0 4px rgba(126,227,190,.12); }
+
+@keyframes victo-drift { 0%, 100% { transform: translate3d(0,0,0) rotate(0); } 50% { transform: translate3d(-13px, 10px, 0) rotate(7deg); } }
 .content-header { padding: 0 0 .25rem; }
 .content h1, .content-header h1 {
     font-size: 1.6rem;
@@ -196,6 +194,7 @@ body.font-sans {
     box-shadow: var(--victo-shadow);
     overflow: hidden;
 }
+.card:hover { box-shadow: 0 18px 42px rgba(11, 20, 49, .09); }
 .card-header {
     min-height: 58px;
     display: flex;
@@ -217,16 +216,18 @@ body.font-sans {
     min-height: 142px;
     border-radius: var(--victo-radius);
     overflow: hidden;
-    box-shadow: var(--victo-shadow);
+    box-shadow: 0 14px 30px rgba(11, 20, 49, .12);
+    isolation: isolate;
 }
+.small-box::after { content:""; position:absolute; z-index:-1; width:130px; height:130px; right:-45px; bottom:-65px; border:1px solid rgba(255,255,255,.18); border-radius:50%; }
 .small-box > .inner { padding: 1.3rem; }
 .small-box h3 { font-size: 2rem; font-weight: 750; }
 .small-box p { font-size: .85rem; font-weight: 600; opacity: .9; }
 .small-box .icon > i { top: 20px; right: 18px; font-size: 4rem; opacity: .16; }
-.small-box.bg-info, .small-box.bg-primary { background: linear-gradient(135deg, #3457d5, #263f9d) !important; }
-.small-box.bg-success { background: linear-gradient(135deg, #168579, #0d625d) !important; }
-.small-box.bg-warning { color: #3a2b0e !important; background: linear-gradient(135deg, #f4ca76, #e8ad4d) !important; }
-.small-box.bg-danger { background: linear-gradient(135deg, #d85865, #a93c54) !important; }
+.small-box.bg-info, .small-box.bg-primary { background: linear-gradient(135deg, #154be3, #08288e) !important; }
+.small-box.bg-success { background: linear-gradient(135deg, #0aa58c, #006c68) !important; }
+.small-box.bg-warning { color: #302200 !important; background: linear-gradient(135deg, #ffd34c, #f0a300) !important; }
+.small-box.bg-danger { background: linear-gradient(135deg, #f05060, #ae234e) !important; }
 
 .btn {
     border-radius: 8px;
@@ -339,8 +340,8 @@ body.font-sans {
 @media (max-width: 575.98px) {
     body { font-size: .92rem; }
     .main-header.navbar { min-height: 58px; }
-    .top-brand { margin-left: 0; font-size: .85rem; }
-    .top-brand__mark { width: 25px; height: 25px; }
+    .top-brand { margin-left: 0; }
+    .top-brand__logo { width: 96px; height: 29px; }
     .main-header .navbar-nav.ml-auto { gap: 0; }
     .main-header .nav-item.mr-3 { margin-right: .2rem !important; }
     .main-header .nav-item.mr-3 span { display: none; }
@@ -350,7 +351,7 @@ body.font-sans {
     .page-masthead { min-height: 82px; padding: 1rem; margin-bottom: 1rem; border-radius:14px; }
     .page-masthead__context { display: none; }
     .page-masthead__name { font-size: 1.14rem; }
-    .page-masthead .victo-mark { width: 35px; height: 35px; }
+    .page-masthead__logo { width: 114px; height: 38px; }
     .content { padding: .85rem 0 1.4rem !important; }
     .content .container-fluid { padding-right: .7rem; padding-left: .7rem; }
     .content h1, .content-header h1 { font-size: 1.26rem; }
