@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Order;
-use App\Models\OrderItem;
 use App\Models\User;
 use Carbon\Carbon;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -154,40 +153,6 @@ class ReportController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | Period Sales
-        |--------------------------------------------------------------------------
-        */
-
-        $periodSales = OrderItem::whereHas(
-            'order',
-            function ($query) use (
-                $startDate,
-                $endDate
-            ) {
-
-                $query->whereBetween(
-                    'created_at',
-                    [
-                        $startDate,
-                        $endDate
-                    ]
-                );
-
-            }
-        )->sum('subtotal');
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | Overall Sales
-        |--------------------------------------------------------------------------
-        */
-
-        $totalSales = OrderItem::sum('subtotal');
-
-
-        /*
-        |--------------------------------------------------------------------------
         | New vs Repeat Orders
         |--------------------------------------------------------------------------
         */
@@ -215,6 +180,7 @@ class ReportController extends Controller
 
         $designerPerformance = User::role('designer')
             ->withCount([
+
                 'assignedOrders as assigned_orders_count' => function ($query) use (
                     $startDate,
                     $endDate
@@ -269,6 +235,7 @@ class ReportController extends Controller
                         );
 
                 },
+
             ])
             ->get();
 
@@ -303,7 +270,6 @@ class ReportController extends Controller
         */
 
         $chartLabels = [];
-        $salesChartData = [];
         $ordersChartData = [];
 
 
@@ -337,27 +303,7 @@ class ReportController extends Controller
                 )->count();
 
 
-                $sales = OrderItem::whereHas(
-                    'order',
-                    function ($query) use (
-                        $monthStart,
-                        $monthEnd
-                    ) {
-
-                        $query->whereBetween(
-                            'created_at',
-                            [
-                                $monthStart,
-                                $monthEnd
-                            ]
-                        );
-
-                    }
-                )->sum('subtotal');
-
-
                 $ordersChartData[] = $ordersCount;
-                $salesChartData[] = $sales;
             }
 
         } else {
@@ -394,27 +340,7 @@ class ReportController extends Controller
                 )->count();
 
 
-                $sales = OrderItem::whereHas(
-                    'order',
-                    function ($query) use (
-                        $dayStart,
-                        $dayEnd
-                    ) {
-
-                        $query->whereBetween(
-                            'created_at',
-                            [
-                                $dayStart,
-                                $dayEnd
-                            ]
-                        );
-
-                    }
-                )->sum('subtotal');
-
-
                 $ordersChartData[] = $ordersCount;
-                $salesChartData[] = $sales;
             }
         }
 
@@ -443,9 +369,6 @@ class ReportController extends Controller
                 'overdueOrders',
                 'completionRate',
 
-                'periodSales',
-                'totalSales',
-
                 'newOrders',
                 'repeatOrders',
 
@@ -453,19 +376,19 @@ class ReportController extends Controller
                 'topCustomers',
 
                 'chartLabels',
-                'salesChartData',
                 'ordersChartData'
             )
         );
     }
 
+
     public function exportExcel()
-{
-    return Excel::download(
-        new ReportExport,
-        'victooms-report-' . now()->format('Y-m-d') . '.xlsx'
-    );
-}
+    {
+        return Excel::download(
+            new ReportExport,
+            'victooms-report-' . now()->format('Y-m-d') . '.xlsx'
+        );
+    }
 
 
     /*
@@ -642,32 +565,6 @@ class ReportController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | Sales
-        |--------------------------------------------------------------------------
-        */
-
-        $periodSales =
-            OrderItem::whereHas(
-                'order',
-                function ($query) use (
-                    $startDate,
-                    $endDate
-                ) {
-
-                    $query->whereBetween(
-                        'created_at',
-                        [
-                            $startDate,
-                            $endDate
-                        ]
-                    );
-
-                }
-            )->sum('subtotal');
-
-
-        /*
-        |--------------------------------------------------------------------------
         | New / Repeat
         |--------------------------------------------------------------------------
         */
@@ -808,8 +705,6 @@ class ReportController extends Controller
 
                 'overdueOrders',
                 'completionRate',
-
-                'periodSales',
 
                 'newOrders',
                 'repeatOrders',

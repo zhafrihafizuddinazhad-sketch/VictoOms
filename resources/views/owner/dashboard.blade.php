@@ -36,14 +36,15 @@
     <div class="col-md-4">
         <div class="small-box bg-warning">
             <div class="inner">
-                <h3>RM {{ number_format($totalRevenue,2) }}</h3>
-                <p>Total Revenue</p>
+                <h3>{{ $completed }}</h3>
+                <p>Completed Orders</p>
             </div>
             <div class="icon">
-                <i class="fas fa-dollar-sign"></i>
+                <i class="fas fa-check-circle"></i>
             </div>
         </div>
     </div>
+</div>
 
 </div>
 

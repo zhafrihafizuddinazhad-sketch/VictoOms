@@ -25,6 +25,7 @@ use App\Http\Controllers\JobOrderController;
 use App\Http\Controllers\CameramanMonitoringController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\AccountController;
 
 
 /*
@@ -84,6 +85,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password.update');
 });
 
 
@@ -562,6 +566,31 @@ Route::middleware(['auth', 'role:cameraman'])->group(function () {
 
 });
 
+
+/*
+|--------------------------------------------------------------------------
+| ACCOUNT MANAGEMENT
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware(['auth', 'role:owner|admin'])->group(function () {
+
+    Route::get(
+        '/accounts',
+        [AccountController::class, 'index']
+    )->name('accounts.index');
+
+    Route::get(
+        '/accounts/create',
+        [AccountController::class, 'create']
+    )->name('accounts.create');
+
+    Route::post(
+        '/accounts',
+        [AccountController::class, 'store']
+    )->name('accounts.store');
+
+});
 
 /*
 |--------------------------------------------------------------------------

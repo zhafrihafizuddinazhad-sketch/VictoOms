@@ -8,37 +8,37 @@
     {{-- HEADER --}}
     {{-- ========================================================= --}}
 
-
     <div class="d-flex justify-content-between align-items-center mb-4">
 
-    <div>
-        <h1 class="mb-1">Reports</h1>
-        <p class="text-muted mb-0">
-            Overview of order performance and business activity.
-        </p>
+        <div>
+            <h1 class="mb-1">Reports</h1>
+            <p class="text-muted mb-0">
+                Overview of order performance and business activity.
+            </p>
+        </div>
+
+        <div class="d-flex" style="gap: 10px;">
+
+            <a
+                href="{{ route('owner.reports.export.pdf') }}"
+                class="btn btn-danger"
+            >
+                <i class="fas fa-file-pdf mr-1"></i>
+                Export PDF
+            </a>
+
+            <a
+                href="{{ route('owner.reports.export.excel') }}"
+                class="btn btn-success"
+            >
+                <i class="fas fa-file-excel mr-1"></i>
+                Export Excel
+            </a>
+
+        </div>
+
     </div>
 
-    <div class="d-flex" style="gap: 10px;">
-
-        <a
-            href="{{ route('owner.reports.export.pdf') }}"
-            class="btn btn-danger"
-        >
-            <i class="fas fa-file-pdf mr-1"></i>
-            Export PDF
-        </a>
-
-        <a
-            href="{{ route('owner.reports.export.excel') }}"
-            class="btn btn-success"
-        >
-            <i class="fas fa-file-excel mr-1"></i>
-            Export Excel
-        </a>
-
-    </div>
-
-</div>
 
     <div class="d-flex justify-content-between align-items-center mb-4">
 
@@ -49,7 +49,7 @@
             </h1>
 
             <p class="text-muted mb-0">
-                Order and business performance overview
+                Order performance overview
             </p>
         </div>
 
@@ -62,133 +62,144 @@
 
     </div>
 
+
+    {{-- ========================================================= --}}
+    {{-- REPORT FILTER --}}
+    {{-- ========================================================= --}}
+
     <div class="card card-outline card-primary mb-4">
 
-    <div class="card-header">
-        <h3 class="card-title">
-            <i class="fas fa-filter mr-1"></i>
-            Report Filter
-        </h3>
-    </div>
+        <div class="card-header">
+            <h3 class="card-title">
+                <i class="fas fa-filter mr-1"></i>
+                Report Filter
+            </h3>
+        </div>
 
-    <div class="card-body">
+        <div class="card-body">
 
-        <form method="GET" action="{{ route('owner.reports') }}">
+            <form method="GET" action="{{ route('owner.reports') }}">
 
-            <div class="row">
+                <div class="row">
 
-                {{-- Report Type --}}
-                <div class="col-md-4">
-                    <div class="form-group">
+                    {{-- Report Type --}}
+                    <div class="col-md-4">
 
-                        <label>Report Type</label>
+                        <div class="form-group">
 
-                        <select
-                            name="type"
-                            id="reportType"
-                            class="form-control">
+                            <label>Report Type</label>
 
-                            <option value="monthly"
-                                {{ ($type ?? 'monthly') === 'monthly' ? 'selected' : '' }}>
-                                Monthly
-                            </option>
-
-                            <option value="annual"
-                                {{ ($type ?? 'monthly') === 'annual' ? 'selected' : '' }}>
-                                Annual
-                            </option>
-
-                        </select>
-
-                    </div>
-                </div>
-
-
-                {{-- Month --}}
-<div
-    class="col-md-4"
-    id="monthField"
-    style="{{ ($type ?? 'monthly') === 'annual' ? 'display: none;' : '' }}"
->
-
-    <div class="form-group">
-
-        <label>Month</label>
-
-        <select
-            name="month"
-            class="form-control"
-        >
-
-            @for($m = 1; $m <= 12; $m++)
-
-                <option
-                    value="{{ $m }}"
-                    {{ ($month ?? now()->month) == $m ? 'selected' : '' }}
-                >
-                    {{ \Carbon\Carbon::create()->month($m)->format('F') }}
-                </option>
-
-            @endfor
-
-        </select>
-
-    </div>
-
-</div>
-
-                {{-- Year --}}
-                <div class="col-md-4">
-
-                    <div class="form-group">
-
-                        <label>Year</label>
-
-                        <select
-                            name="year"
-                            class="form-control">
-
-                            @for($y = now()->year; $y >= now()->year - 5; $y--)
+                            <select
+                                name="type"
+                                id="reportType"
+                                class="form-control"
+                            >
 
                                 <option
-                                    value="{{ $y }}"
-                                    {{ ($year ?? now()->year) == $y ? 'selected' : '' }}>
-
-                                    {{ $y }}
-
+                                    value="monthly"
+                                    {{ ($type ?? 'monthly') === 'monthly' ? 'selected' : '' }}
+                                >
+                                    Monthly
                                 </option>
 
-                            @endfor
+                                <option
+                                    value="annual"
+                                    {{ ($type ?? 'monthly') === 'annual' ? 'selected' : '' }}
+                                >
+                                    Annual
+                                </option>
 
-                        </select>
+                            </select>
+
+                        </div>
+
+                    </div>
+
+
+                    {{-- Month --}}
+                    <div
+                        class="col-md-4"
+                        id="monthField"
+                        style="{{ ($type ?? 'monthly') === 'annual' ? 'display: none;' : '' }}"
+                    >
+
+                        <div class="form-group">
+
+                            <label>Month</label>
+
+                            <select
+                                name="month"
+                                class="form-control"
+                            >
+
+                                @for($m = 1; $m <= 12; $m++)
+
+                                    <option
+                                        value="{{ $m }}"
+                                        {{ ($month ?? now()->month) == $m ? 'selected' : '' }}
+                                    >
+                                        {{ \Carbon\Carbon::create()->month($m)->format('F') }}
+                                    </option>
+
+                                @endfor
+
+                            </select>
+
+                        </div>
+
+                    </div>
+
+
+                    {{-- Year --}}
+                    <div class="col-md-4">
+
+                        <div class="form-group">
+
+                            <label>Year</label>
+
+                            <select
+                                name="year"
+                                class="form-control"
+                            >
+
+                                @for($y = now()->year; $y >= now()->year - 5; $y--)
+
+                                    <option
+                                        value="{{ $y }}"
+                                        {{ ($year ?? now()->year) == $y ? 'selected' : '' }}
+                                    >
+                                        {{ $y }}
+                                    </option>
+
+                                @endfor
+
+                            </select>
+
+                        </div>
 
                     </div>
 
                 </div>
 
-            </div>
 
+                <div class="d-flex align-items-center">
 
-            <div class="d-flex align-items-center">
+                    <button
+                        type="submit"
+                        class="btn btn-primary mr-2"
+                    >
+                        <i class="fas fa-chart-bar mr-1"></i>
+                        Generate Report
+                    </button>
 
-    <button
-        type="submit"
-        class="btn btn-primary mr-2">
+                </div>
 
-        <i class="fas fa-chart-bar mr-1"></i>
+            </form>
 
-        Generate Report
-
-    </button>
-
-
-</div>
-
-        </form>
+        </div>
 
     </div>
 
-</div>
 
     {{-- ========================================================= --}}
     {{-- ORDER SUMMARY --}}
@@ -210,9 +221,7 @@
                 </div>
 
                 <div class="icon">
-
                     <i class="fas fa-shopping-cart"></i>
-
                 </div>
 
             </div>
@@ -234,9 +243,7 @@
                 </div>
 
                 <div class="icon">
-
                     <i class="fas fa-check-circle"></i>
-
                 </div>
 
             </div>
@@ -258,9 +265,7 @@
                 </div>
 
                 <div class="icon">
-
                     <i class="fas fa-spinner"></i>
-
                 </div>
 
             </div>
@@ -282,9 +287,7 @@
                 </div>
 
                 <div class="icon">
-
                     <i class="fas fa-exclamation-triangle"></i>
-
                 </div>
 
             </div>
@@ -306,9 +309,7 @@
             <div class="info-box">
 
                 <span class="info-box-icon bg-warning">
-
                     <i class="fas fa-clock"></i>
-
                 </span>
 
                 <div class="info-box-content">
@@ -334,9 +335,7 @@
             <div class="info-box">
 
                 <span class="info-box-icon bg-warning">
-
                     <i class="fas fa-search"></i>
-
                 </span>
 
                 <div class="info-box-content">
@@ -362,9 +361,7 @@
             <div class="info-box">
 
                 <span class="info-box-icon bg-secondary">
-
                     <i class="fas fa-print"></i>
-
                 </span>
 
                 <div class="info-box-content">
@@ -390,9 +387,7 @@
             <div class="info-box">
 
                 <span class="info-box-icon bg-success">
-
                     <i class="fas fa-percentage"></i>
-
                 </span>
 
                 <div class="info-box-content">
@@ -415,12 +410,12 @@
 
 
     {{-- ========================================================= --}}
-    {{-- SALES --}}
+    {{-- ORDER ACTIVITY --}}
     {{-- ========================================================= --}}
 
     <div class="row">
 
-        {{-- Monthly Orders --}}
+        {{-- Order Activity --}}
         <div class="col-lg-4">
 
             <div class="card">
@@ -431,7 +426,7 @@
 
                         <i class="fas fa-calendar mr-1"></i>
 
-                        This Month
+                        Order Activity
 
                     </h3>
 
@@ -444,15 +439,11 @@
                         <div class="col-6">
 
                             <h3 class="text-primary">
-
                                 {{ $totalOrders }}
-
                             </h3>
 
                             <p class="text-muted mb-0">
-
                                 Orders
-
                             </p>
 
                         </div>
@@ -461,15 +452,11 @@
                         <div class="col-6">
 
                             <h3 class="text-success">
-
-                                RM {{ number_format($periodSales, 2) }}
-
+                                {{ $completedOrders }}
                             </h3>
 
                             <p class="text-muted mb-0">
-
-                                Sales
-
+                                Completed
                             </p>
 
                         </div>
@@ -483,7 +470,7 @@
         </div>
 
 
-        {{-- Total Sales --}}
+        {{-- Workflow Status --}}
         <div class="col-lg-4">
 
             <div class="card">
@@ -492,9 +479,9 @@
 
                     <h3 class="card-title">
 
-                        <i class="fas fa-money-bill-wave mr-1"></i>
+                        <i class="fas fa-tasks mr-1"></i>
 
-                        Overall Sales
+                        Workflow Status
 
                     </h3>
 
@@ -502,16 +489,12 @@
 
                 <div class="card-body text-center">
 
-                    <h2 class="text-success">
-
-                        RM {{ number_format($totalSales, 2) }}
-
+                    <h2 class="text-warning">
+                        {{ $pendingApprovalOrders }}
                     </h2>
 
                     <p class="text-muted mb-0">
-
-                        Total sales recorded
-
+                        Orders Pending Approval
                     </p>
 
                 </div>
@@ -521,16 +504,8 @@
         </div>
 
 
-        {{-- Average Order Value --}}
+        {{-- Order Monitoring --}}
         <div class="col-lg-4">
-
-            @php
-
-                $averageOrderValue = $totalOrders > 0
-                    ? $totalSales / $totalOrders
-                    : 0;
-
-            @endphp
 
             <div class="card">
 
@@ -538,9 +513,9 @@
 
                     <h3 class="card-title">
 
-                        <i class="fas fa-calculator mr-1"></i>
+                        <i class="fas fa-eye mr-1"></i>
 
-                        Average Order Value
+                        Order Monitoring
 
                     </h3>
 
@@ -548,16 +523,12 @@
 
                 <div class="card-body text-center">
 
-                    <h2 class="text-info">
-
-                        RM {{ number_format($averageOrderValue, 2) }}
-
+                    <h2 class="text-danger">
+                        {{ $overdueOrders }}
                     </h2>
 
                     <p class="text-muted mb-0">
-
-                        Average value per order
-
+                        Overdue Orders
                     </p>
 
                 </div>
@@ -598,15 +569,11 @@
                         <div class="col-6">
 
                             <h2 class="text-primary">
-
                                 {{ $newOrders }}
-
                             </h2>
 
                             <p class="text-muted">
-
                                 New Orders
-
                             </p>
 
                         </div>
@@ -615,15 +582,11 @@
                         <div class="col-6">
 
                             <h2 class="text-info">
-
                                 {{ $repeatOrders }}
-
                             </h2>
 
                             <p class="text-muted">
-
                                 Repeat Orders
-
                             </p>
 
                         </div>
@@ -663,9 +626,7 @@
                     </div>
 
                     <small class="text-muted">
-
                         Repeat order percentage
-
                     </small>
 
                 </div>
@@ -673,41 +634,41 @@
             </div>
 
         </div>
-{{-- ========================================================= --}}
-{{-- REPORT TRENDS --}}
-{{-- ========================================================= --}}
 
-<div class="row">
 
-    {{-- SALES TREND --}}
+        {{-- ========================================================= --}}
+        {{-- REPORT TRENDS --}}
+        {{-- ========================================================= --}}
 
-    <div class="col-md-6">
+        <div class="col-lg-6">
 
-        <div class="card shadow-sm">
+            <div class="card shadow-sm">
 
-            <div class="card-header">
+                <div class="card-header">
 
-                <h5 class="mb-0">
+                    <h5 class="mb-0">
 
-                    <i class="fas fa-chart-line text-success mr-1"></i>
+                        <i class="fas fa-chart-bar text-primary mr-1"></i>
 
-                    Sales Trend
+                        Order Trend
 
-                </h5>
+                    </h5>
 
-                <small class="text-muted">
+                    <small class="text-muted">
 
-                    {{ $periodLabel }}
+                        {{ $periodLabel }}
 
-                </small>
+                    </small>
 
-            </div>
+                </div>
 
-            <div class="card-body">
+                <div class="card-body">
 
-                <div style="height: 300px;">
+                    <div style="height: 300px;">
 
-                    <canvas id="salesTrendChart"></canvas>
+                        <canvas id="orderTrendChart"></canvas>
+
+                    </div>
 
                 </div>
 
@@ -718,47 +679,12 @@
     </div>
 
 
-    {{-- ORDER TREND --}}
+    {{-- ========================================================= --}}
+    {{-- ORDER HEALTH --}}
+    {{-- ========================================================= --}}
 
-    <div class="col-md-6">
+    <div class="row">
 
-        <div class="card shadow-sm">
-
-            <div class="card-header">
-
-                <h5 class="mb-0">
-
-                    <i class="fas fa-chart-bar text-primary mr-1"></i>
-
-                    Order Trend
-
-                </h5>
-
-                <small class="text-muted">
-
-                    {{ $periodLabel }}
-
-                </small>
-
-            </div>
-
-            <div class="card-body">
-
-                <div style="height: 300px;">
-
-                    <canvas id="orderTrendChart"></canvas>
-
-                </div>
-
-            </div>
-
-        </div>
-
-    </div>
-
-</div>
-
-        {{-- Order Health --}}
         <div class="col-lg-6">
 
             <div class="card">
@@ -1151,12 +1077,12 @@
         <strong>Report Information:</strong>
 
         This report provides an overview of order performance,
-        sales, repeat orders, designer performance and customer
-        activity.
+        repeat orders, designer performance and customer activity.
 
     </div>
 
 </div>
+
 
 {{-- ========================================================= --}}
 {{-- CHART.JS --}}
@@ -1180,102 +1106,8 @@ document.addEventListener(
         const labels =
             @json($chartLabels);
 
-        const salesData =
-            @json($salesChartData);
-
         const ordersData =
             @json($ordersChartData);
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | Sales Trend Chart
-        |--------------------------------------------------------------------------
-        */
-
-        const salesCanvas =
-            document.getElementById(
-                'salesTrendChart'
-            );
-
-
-        if (salesCanvas) {
-
-            new Chart(
-                salesCanvas,
-                {
-
-                    type: 'line',
-
-                    data: {
-
-                        labels: labels,
-
-                        datasets: [
-
-                            {
-
-                                label: 'Sales (RM)',
-
-                                data: salesData,
-
-                                borderWidth: 2,
-
-                                tension: 0.3,
-
-                                fill: false
-
-                            }
-
-                        ]
-
-                    },
-
-                    options: {
-
-                        responsive: true,
-
-                        maintainAspectRatio: false,
-
-                        plugins: {
-
-                            legend: {
-
-                                display: true
-
-                            }
-
-                        },
-
-                        scales: {
-
-                            y: {
-
-                                beginAtZero: true,
-
-                                ticks: {
-
-                                    callback: function(value)
-                                    {
-
-                                        return 'RM ' +
-                                            Number(value)
-                                                .toLocaleString();
-
-                                    }
-
-                                }
-
-                            }
-
-                        }
-
-                    }
-
-                }
-            );
-
-        }
 
 
         /*
@@ -1362,12 +1194,17 @@ document.addEventListener(
 
 </script>
 
+
 <script>
 
 document.addEventListener('DOMContentLoaded', function () {
 
-    const reportType = document.getElementById('reportType');
-    const monthField = document.getElementById('monthField');
+    const reportType =
+        document.getElementById('reportType');
+
+    const monthField =
+        document.getElementById('monthField');
+
 
     function toggleMonthField() {
 
@@ -1383,11 +1220,16 @@ document.addEventListener('DOMContentLoaded', function () {
 
     }
 
-    reportType.addEventListener('change', toggleMonthField);
+
+    reportType.addEventListener(
+        'change',
+        toggleMonthField
+    );
 
     toggleMonthField();
 
 });
 
 </script>
+
 @endsection

@@ -91,6 +91,7 @@
 
 <body>
 
+
     {{-- ================================================= --}}
     {{-- HEADER --}}
     {{-- ================================================= --}}
@@ -209,38 +210,67 @@
         <tbody>
 
             <tr>
-                <td>Pending</td>
+
+                <td>
+                    Pending
+                </td>
+
                 <td class="text-center">
                     {{ $pendingOrders }}
                 </td>
+
             </tr>
 
+
             <tr>
-                <td>In Progress</td>
+
+                <td>
+                    In Progress
+                </td>
+
                 <td class="text-center">
                     {{ $inProgressOrders }}
                 </td>
+
             </tr>
 
+
             <tr>
-                <td>Pending Approval</td>
+
+                <td>
+                    Pending Approval
+                </td>
+
                 <td class="text-center">
                     {{ $pendingApprovalOrders }}
                 </td>
+
             </tr>
 
+
             <tr>
-                <td>Printing</td>
+
+                <td>
+                    Printing
+                </td>
+
                 <td class="text-center">
                     {{ $printingOrders }}
                 </td>
+
             </tr>
 
+
             <tr>
-                <td>Completed</td>
+
+                <td>
+                    Completed
+                </td>
+
                 <td class="text-center">
                     {{ $completedOrders }}
                 </td>
+
             </tr>
 
         </tbody>
@@ -249,11 +279,11 @@
 
 
     {{-- ================================================= --}}
-    {{-- SALES --}}
+    {{-- ORDER PERFORMANCE --}}
     {{-- ================================================= --}}
 
     <h2>
-        Sales Performance
+        Order Performance
     </h2>
 
     <table>
@@ -261,36 +291,28 @@
         <tr>
 
             <td>
-                Period Sales
+                Total Orders
             </td>
 
             <td class="text-right">
-
-                RM {{ number_format($periodSales, 2) }}
-
+                {{ number_format($totalOrders) }}
             </td>
 
         </tr>
+
 
         <tr>
 
             <td>
-                Average Order Value
+                Completed Orders
             </td>
 
             <td class="text-right">
-
-                RM
-                {{ number_format(
-                    $totalOrders > 0
-                        ? $periodSales / $totalOrders
-                        : 0,
-                    2
-                ) }}
-
+                {{ number_format($completedOrders) }}
             </td>
 
         </tr>
+
 
         <tr>
 
@@ -299,9 +321,20 @@
             </td>
 
             <td class="text-right">
-
                 {{ $completionRate }}%
+            </td>
 
+        </tr>
+
+
+        <tr>
+
+            <td>
+                Overdue Orders
+            </td>
+
+            <td class="text-right">
+                {{ number_format($overdueOrders) }}
             </td>
 
         </tr>
@@ -348,6 +381,7 @@
                 </td>
 
             </tr>
+
 
             <tr>
 
@@ -457,7 +491,8 @@
 
                     <td
                         colspan="5"
-                        class="text-center">
+                        class="text-center"
+                    >
 
                         No designer data available.
 
@@ -533,7 +568,8 @@
 
                     <td
                         colspan="3"
-                        class="text-center">
+                        class="text-center"
+                    >
 
                         No customer data available.
 
@@ -561,6 +597,7 @@
         {{ now()->format('d M Y, h:i A') }}
 
     </div>
+
 
 </body>
 

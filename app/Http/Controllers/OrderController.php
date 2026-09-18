@@ -253,21 +253,6 @@ return view('orders.index', compact(
 
         'reference_links.*' => 'nullable|url',
 
-        'product_name' => 'required|array|min:1',
-
-        'product_name.*' =>
-            'required|string|max:255',
-
-        'quantity' => 'required|array|min:1',
-
-        'quantity.*' =>
-            'required|integer|min:1',
-
-        'unit_price' => 'required|array|min:1',
-
-        'unit_price.*' =>
-            'required|numeric|min:0',
-
     ]);
 
 
@@ -339,39 +324,6 @@ return view('orders.index', compact(
         ]);
 
 
-        /*
-        |--------------------------------------------------------------------------
-        | Save Order Items
-        |--------------------------------------------------------------------------
-        */
-
-        foreach (
-            $validated['product_name']
-            as $index => $product
-        ) {
-
-            OrderItem::create([
-
-                'order_id' =>
-                    $order->id,
-
-                'product_name' =>
-                    $product,
-
-                'quantity' =>
-                    $validated['quantity'][$index],
-
-                'unit_price' =>
-                    $validated['unit_price'][$index],
-
-                'subtotal' =>
-                    $validated['quantity'][$index]
-                    *
-                    $validated['unit_price'][$index],
-
-            ]);
-
-        }
 
 
         /*

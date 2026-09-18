@@ -205,35 +205,30 @@
 
                     </li>
 
-
-                    {{-- Cameraman Monitoring --}}
-
-                    <li class="nav-item">
-
-                        <a
-                            href="{{ route('owner.cameramen.index') }}"
-                            class="nav-link
-                            {{ request()->routeIs('owner.cameramen.*') ? 'active' : '' }}"
-                        >
-
-                            <i class="nav-icon fas fa-camera"></i>
-
-                            <p>
-
-                                Cameraman Monitoring
-
-                            </p>
-
-                        </a>
-
-                    </li>
-
                     <li class="nav-item">
     <a href="{{ route('owner.reports') }}"
        class="nav-link {{ request()->routeIs('owner.reports') ? 'active' : '' }}">
         <i class="nav-icon fas fa-chart-bar"></i>
         <p>Reports</p>
     </a>
+</li>
+
+{{-- Account Management --}}
+<li class="nav-item">
+
+    <a
+        href="{{ route('accounts.index') }}"
+        class="nav-link {{ request()->routeIs('accounts.*') ? 'active' : '' }}"
+    >
+
+        <i class="nav-icon fas fa-user-cog"></i>
+
+        <p>
+            Account Management
+        </p>
+
+    </a>
+
 </li>
 
 
@@ -417,6 +412,24 @@
 
                     </li>
 
+                    {{-- Account Management --}}
+<li class="nav-item">
+
+    <a
+        href="{{ route('accounts.index') }}"
+        class="nav-link {{ request()->routeIs('accounts.*') ? 'active' : '' }}"
+    >
+
+        <i class="nav-icon fas fa-user-cog"></i>
+
+        <p>
+            Account Management
+        </p>
+
+    </a>
+
+</li>
+
 
                 @endif
 
@@ -532,15 +545,50 @@
 
                 @endif
 
-                {{-- Shared help --}}
-                <li class="nav-header">HELP</li>
-                <li class="nav-item">
-                    <a href="{{ route('manual') }}"
-                       class="nav-link {{ request()->routeIs('manual') ? 'active' : '' }}">
-                        <i class="nav-icon fas fa-book-open"></i>
-                        <p>User Manual</p>
-                    </a>
-                </li>
+                {{-- ================================================= --}}
+{{-- SHARED MENU --}}
+{{-- ================================================= --}}
+
+{{-- Profile --}}
+<li class="nav-item">
+
+    <a
+        href="{{ route('profile') }}"
+        class="nav-link {{ request()->routeIs('profile*') ? 'active' : '' }}"
+    >
+
+        <i class="nav-icon fas fa-user-circle"></i>
+
+        <p>
+            Profile
+        </p>
+
+    </a>
+
+</li>
+
+
+{{-- Help --}}
+<li class="nav-header">
+    HELP
+</li>
+
+<li class="nav-item">
+
+    <a
+        href="{{ route('manual') }}"
+        class="nav-link {{ request()->routeIs('manual') ? 'active' : '' }}"
+    >
+
+        <i class="nav-icon fas fa-book-open"></i>
+
+        <p>
+            User Manual
+        </p>
+
+    </a>
+
+</li>
 
 
             </ul>
