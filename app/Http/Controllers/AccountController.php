@@ -9,21 +9,23 @@ use Illuminate\Validation\Rule;
 
 class AccountController extends Controller
 {
-    /**
-     * Display all staff accounts.
-     */
-    public function index()
+    public function index(Request $request)
     {
+        $status = $request->get('status', 'active');
+
         $users = User::with('roles')
+            ->when(
+                in_array($status, ['active', 'inactive', 'archived']),
+                function ($query) use ($status) {
+                    $query->where('account_status', $status);
+                }
+            )
             ->orderBy('name')
             ->get();
 
-        return view('accounts.index', compact('users'));
+        return view('accounts.index', compact('users', 'status'));
     }
 
-    /**
-     * Show create account form.
-     */
     public function create()
     {
         $user = auth()->user();
@@ -33,7 +35,6 @@ class AccountController extends Controller
             'cameraman',
         ];
 
-        // Only Owner can create Admin accounts.
         if ($user->hasRole('owner')) {
             array_unshift($roles, 'admin');
         }
@@ -41,9 +42,6 @@ class AccountController extends Controller
         return view('accounts.create', compact('roles'));
     }
 
-    /**
-     * Store a new staff account.
-     */
     public function store(Request $request)
     {
         $user = auth()->user();
@@ -53,18 +51,12 @@ class AccountController extends Controller
             'cameraman',
         ];
 
-        // Only Owner can create Admin accounts.
         if ($user->hasRole('owner')) {
             $allowedRoles[] = 'admin';
         }
 
         $validated = $request->validate([
-            'name' => [
-                'required',
-                'string',
-                'max:255',
-            ],
-
+            'name' => ['required', 'string', 'max:255'],
             'email' => [
                 'required',
                 'string',
@@ -73,23 +65,9 @@ class AccountController extends Controller
                 'max:255',
                 'unique:users,email',
             ],
-
-            'phone' => [
-                'nullable',
-                'string',
-                'max:30',
-            ],
-
-            'role' => [
-                'required',
-                Rule::in($allowedRoles),
-            ],
-
-            'password' => [
-                'required',
-                'confirmed',
-                'min:8',
-            ],
+            'phone' => ['nullable', 'string', 'max:30'],
+            'role' => ['required', Rule::in($allowedRoles)],
+            'password' => ['required', 'confirmed', 'min:8'],
         ]);
 
         $newUser = User::create([
@@ -97,6 +75,7 @@ class AccountController extends Controller
             'email' => $validated['email'],
             'phone' => $validated['phone'] ?? null,
             'password' => Hash::make($validated['password']),
+            'account_status' => 'active',
         ]);
 
         $newUser->assignRole($validated['role']);
@@ -105,4 +84,48 @@ class AccountController extends Controller
             ->route('accounts.index')
             ->with('success', 'Account created successfully.');
     }
+
+    public function deactivate(User $user)
+    {
+        if ($user->id === auth()->id()) {
+            return back()->with('error', 'You cannot deactivate your own account.');
+        }
+
+        $user->update([
+            'account_status' => 'inactive',
+        ]);
+
+        return back()->with('success', 'Account deactivated successfully.');
+    }
+
+    public function reactivate(User $user)
+    {
+        $user->update([
+            'account_status' => 'active',
+        ]);
+
+        return back()->with('success', 'Account reactivated successfully.');
+    }
+
+    public function archive(User $user)
+    {
+        if ($user->id === auth()->id()) {
+            return back()->with('error', 'You cannot archive your own account.');
+        }
+
+        $user->update([
+            'account_status' => 'archived',
+        ]);
+
+        return back()->with('success', 'Account archived successfully.');
+    }
+
+    public function restore(User $user)
+{
+    $user->update([
+        'account_status' => 'inactive',
+    ]);
+
+    return back()->with('success', 'Account restored successfully.');
+}
 }

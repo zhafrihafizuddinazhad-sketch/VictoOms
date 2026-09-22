@@ -42,6 +42,48 @@
     @endif
 
 
+    {{-- Error Message --}}
+    @if(session('error'))
+        <div class="alert alert-danger alert-dismissible fade show">
+            <i class="fas fa-exclamation-circle"></i>
+            {{ session('error') }}
+
+            <button type="button"
+                    class="close"
+                    data-dismiss="alert"
+                    aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    @endif
+
+
+    {{-- Status Filter --}}
+    <div class="mb-3">
+        <div class="btn-group" role="group">
+
+            <a href="{{ route('accounts.index', ['status' => 'active']) }}"
+               class="btn {{ $status === 'active' ? 'btn-primary' : 'btn-outline-primary' }}">
+                <i class="fas fa-user-check"></i>
+                Active
+            </a>
+
+            <a href="{{ route('accounts.index', ['status' => 'inactive']) }}"
+               class="btn {{ $status === 'inactive' ? 'btn-secondary' : 'btn-outline-secondary' }}">
+                <i class="fas fa-user-clock"></i>
+                Inactive
+            </a>
+
+            <a href="{{ route('accounts.index', ['status' => 'archived']) }}"
+               class="btn {{ $status === 'archived' ? 'btn-dark' : 'btn-outline-dark' }}">
+                <i class="fas fa-archive"></i>
+                Archived
+            </a>
+
+        </div>
+    </div>
+
+
     {{-- Account List --}}
     <div class="card card-primary card-outline">
 
@@ -65,7 +107,9 @@
                             <th>Email</th>
                             <th>Phone</th>
                             <th>Role</th>
+                            <th>Status</th>
                             <th>Member Since</th>
+                            <th style="width: 220px;">Action</th>
                         </tr>
                     </thead>
 
@@ -136,9 +180,128 @@
                                 </td>
 
 
+                                {{-- Status --}}
+                                <td>
+
+                                    @if($staff->account_status === 'active')
+
+                                        <span class="badge badge-success">
+                                            <i class="fas fa-check-circle"></i>
+                                            Active
+                                        </span>
+
+                                    @elseif($staff->account_status === 'inactive')
+
+                                        <span class="badge badge-warning">
+                                            <i class="fas fa-pause-circle"></i>
+                                            Inactive
+                                        </span>
+
+                                    @elseif($staff->account_status === 'archived')
+
+                                        <span class="badge badge-dark">
+                                            <i class="fas fa-archive"></i>
+                                            Archived
+                                        </span>
+
+                                    @else
+
+                                        <span class="badge badge-secondary">
+                                            Unknown
+                                        </span>
+
+                                    @endif
+
+                                </td>
+
+
                                 {{-- Member Since --}}
                                 <td>
                                     {{ $staff->created_at?->format('d M Y') ?? '-' }}
+                                </td>
+
+
+                                {{-- Actions --}}
+                                <td>
+
+                                    @if($staff->id === auth()->id())
+
+                                        <span class="text-muted">
+                                            <i class="fas fa-user"></i>
+                                            Current Account
+                                        </span>
+
+                                    @elseif($staff->account_status === 'active')
+
+                                        <form action="{{ route('accounts.deactivate', $staff) }}"
+                                              method="POST"
+                                              class="d-inline"
+                                              onsubmit="return confirm('Deactivate this account? The staff member will no longer be able to login or receive new assignments.');">
+
+                                            @csrf
+                                            @method('PATCH')
+
+                                            <button type="submit"
+                                                    class="btn btn-sm btn-warning">
+                                                <i class="fas fa-user-slash"></i>
+                                                Deactivate
+                                            </button>
+
+                                        </form>
+
+                                    @elseif($staff->account_status === 'inactive')
+
+                                        <form action="{{ route('accounts.reactivate', $staff) }}"
+                                              method="POST"
+                                              class="d-inline">
+
+                                            @csrf
+                                            @method('PATCH')
+
+                                            <button type="submit"
+                                                    class="btn btn-sm btn-success">
+                                                <i class="fas fa-user-check"></i>
+                                                Reactivate
+                                            </button>
+
+                                        </form>
+
+                                        <form action="{{ route('accounts.archive', $staff) }}"
+                                              method="POST"
+                                              class="d-inline"
+                                              onsubmit="return confirm('Archive this account? It will no longer appear in the Active or Inactive account lists.');">
+
+                                            @csrf
+                                            @method('PATCH')
+
+                                            <button type="submit"
+                                                    class="btn btn-sm btn-dark">
+                                                <i class="fas fa-archive"></i>
+                                                Archive
+                                            </button>
+
+                                        </form>
+
+                                    @elseif($staff->account_status === 'archived')
+
+    <form action="{{ route('accounts.restore', $staff) }}"
+          method="POST"
+          class="d-inline"
+          onsubmit="return confirm('Restore this account? The account will be moved back to Inactive status.');">
+
+        @csrf
+        @method('PATCH')
+
+        <button type="submit"
+                class="btn btn-sm btn-secondary">
+            <i class="fas fa-undo"></i>
+            Restore
+        </button>
+
+    </form>
+
+                                    @endif
+
                                 </td>
 
                             </tr>
@@ -146,7 +309,7 @@
                         @empty
 
                             <tr>
-                                <td colspan="6" class="text-center py-4">
+                                <td colspan="8" class="text-center py-4">
 
                                     <i class="fas fa-users fa-2x text-muted mb-2"></i>
 
