@@ -16,7 +16,7 @@
 
 
         <a
-            href="{{ route('orders.index') }}"
+            href="{{ route('admin.orders.index') }}"
             class="btn btn-outline-primary btn-sm">
 
             View All Orders
