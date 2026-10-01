@@ -18,6 +18,8 @@
         <div class="min-h-screen bg-slate-50">
             @include('layouts.navigation')
 
+            @include('components.impersonation-banner')
+
             <!-- Page Heading -->
             @isset($header)
                 <header class="bg-white border-b border-slate-200">
@@ -29,7 +31,7 @@
 
             <!-- Page Content -->
             <main class="pb-8">
-                {{ $slot }}
+                @yield('content')
             </main>
         </div>
     </body>

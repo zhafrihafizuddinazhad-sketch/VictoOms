@@ -8,7 +8,7 @@
         </li>
     </ul>
 
-    <a href="{{ auth()->user()->hasRole('owner') ? route('owner.dashboard') : (auth()->user()->hasRole('admin') ? route('admin.dashboard') : (auth()->user()->hasRole('designer') ? route('designer.dashboard') : route('cameraman.dashboard'))) }}" class="top-brand" aria-label="Victo OMS home">
+    <a href="{{ auth()->user()->hasRole('developer') ? route('developer.dashboard') : (auth()->user()->hasRole('owner') ? route('owner.dashboard') : (auth()->user()->hasRole('admin') ? route('admin.dashboard') : (auth()->user()->hasRole('designer') ? route('designer.dashboard') : route('cameraman.dashboard')))) }}" class="top-brand" aria-label="Victo OMS home">
         <img src="{{ asset('images/victo-logo.png') }}?v=20260917" alt="Victo OMS" class="top-brand__logo">
     </a>
 

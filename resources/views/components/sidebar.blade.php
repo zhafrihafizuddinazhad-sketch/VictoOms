@@ -10,6 +10,13 @@
 
     @endphp
 
+    @if($user->hasRole('developer'))
+        <a href="{{ route('developer.dashboard') }}" class="brand-link">
+            <img src="{{ asset('images/victo-logo.png') }}?v=20260917" alt="Victo" class="brand-logo-img" aria-hidden="true">
+            <span class="brand-text font-weight-light">Victo OMS · Developer</span>
+        </a>
+    @endif
+
 
     {{-- OWNER BRAND --}}
 
@@ -106,6 +113,19 @@
 
 
                 {{-- ================================================= --}}
+                {{-- DEVELOPER SIDEBAR --}}
+                {{-- ================================================= --}}
+
+                @if($user->hasRole('developer'))
+                    <li class="nav-item">
+                        <a href="{{ route('developer.dashboard') }}" class="nav-link {{ request()->routeIs('developer.dashboard') ? 'active' : '' }}">
+                            <i class="nav-icon fas fa-code"></i><p>Developer Console</p>
+                        </a>
+                    </li>
+                @endif
+
+
+                {{-- ================================================= --}}
                 {{-- OWNER SIDEBAR --}}
                 {{-- ================================================= --}}
 
@@ -178,6 +198,12 @@
 
                         </a>
 
+                    </li>
+
+                    <li class="nav-item">
+                        <a href="{{ route('sample-orders.index') }}" class="nav-link {{ request()->routeIs('sample-orders.*', 'sample-items.*') ? 'active' : '' }}">
+                            <i class="nav-icon fas fa-box-open"></i><p>Sample Management</p>
+                        </a>
                     </li>
 
 
@@ -353,6 +379,12 @@
 
                         </a>
 
+                    </li>
+
+                    <li class="nav-item">
+                        <a href="{{ route('sample-orders.index') }}" class="nav-link {{ request()->routeIs('sample-orders.*', 'sample-items.*') ? 'active' : '' }}">
+                            <i class="nav-icon fas fa-box-open"></i><p>Sample Management</p>
+                        </a>
                     </li>
 
 

@@ -26,6 +26,8 @@
     {{-- Navbar --}}
     @include('components.navbar')
 
+    @include('components.impersonation-banner')
+
     {{-- Sidebar --}}
     @include('components.sidebar')
 

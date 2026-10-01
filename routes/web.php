@@ -26,6 +26,13 @@ use App\Http\Controllers\CameramanMonitoringController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AccountController;
+use App\Http\Controllers\SampleOrderController;
+use App\Http\Controllers\SampleItemController;
+use App\Http\Controllers\SamplePhotoController;
+use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\SampleReturnController;
+use App\Http\Controllers\CustomerSamplePhotoController;
+use App\Http\Controllers\DeveloperController;
 
 
 /*
@@ -41,6 +48,10 @@ Route::get('/', function () {
     }
 
     $user = auth()->user();
+
+    if ($user->hasRole('developer')) {
+        return redirect()->route('developer.dashboard');
+    }
 
 
     if ($user->hasRole('owner')) {
@@ -82,13 +93,21 @@ Route::get('/dashboard', function () {
 })->middleware('auth')->name('dashboard');
 
 Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password.update');
 });
+
+Route::middleware(['auth', 'role:developer'])->prefix('developer')->name('developer.')->group(function () {
+    Route::get('/dashboard', [DeveloperController::class, 'index'])->name('dashboard');
+    Route::post('/impersonate/{user}', [DeveloperController::class, 'impersonate'])->name('impersonate');
+});
+
+Route::post('/developer/impersonation/stop', [DeveloperController::class, 'stopImpersonation'])
+    ->middleware('auth')
+    ->name('developer.impersonation.stop');
 
 
 /*
@@ -100,20 +119,7 @@ Route::middleware('auth')->group(function () {
 Route::middleware(['auth', 'role:owner'])->group(function () {
 
 
-    Route::get(
-    '/owner/reports',
-    [ReportController::class, 'index']
-)->name('owner.reports');
 
-Route::get(
-    '/owner/reports/export/pdf',
-    [ReportController::class, 'exportPdf']
-)->name('owner.reports.export.pdf');
-
-Route::get(
-    '/owner/reports/export/excel',
-    [ReportController::class, 'exportExcel']
-)->name('owner.reports.export.excel');
 
     /*
     |--------------------------------------------------------------------------
@@ -178,29 +184,6 @@ Route::get(
     | Owner Order References
     |--------------------------------------------------------------------------
     */
-
-    Route::post(
-        '/orders/{order}/references',
-        [OrderReferenceController::class, 'store']
-    )->name('orders.references.store');
-
-
-    Route::delete(
-        '/references/{reference}',
-        [OrderReferenceController::class, 'destroy']
-    )->name('orders.references.destroy');
-
-
-    Route::get(
-        '/references/{reference}/download',
-        [OrderReferenceController::class, 'download']
-    )->name('orders.references.download');
-
-
-    Route::get(
-        '/references/{reference}/preview',
-        [OrderReferenceController::class, 'preview']
-    )->name('orders.references.preview');
 
 });
 
@@ -327,7 +310,43 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 
 Route::middleware(['auth', 'role:owner|admin'])->group(function () {
 
+Route::post(
+        '/orders/{order}/references',
+        [OrderReferenceController::class, 'store']
+    )->name('orders.references.store');
 
+
+    Route::delete(
+        '/references/{reference}',
+        [OrderReferenceController::class, 'destroy']
+    )->name('orders.references.destroy');
+
+
+    Route::get(
+        '/references/{reference}/download',
+        [OrderReferenceController::class, 'download']
+    )->name('orders.references.download');
+
+
+    Route::get(
+        '/references/{reference}/preview',
+        [OrderReferenceController::class, 'preview']
+    )->name('orders.references.preview');
+
+Route::get(
+    '/owner/reports',
+    [ReportController::class, 'index']
+)->name('owner.reports');
+
+Route::get(
+    '/owner/reports/export/pdf',
+    [ReportController::class, 'exportPdf']
+)->name('owner.reports.export.pdf');
+
+Route::get(
+    '/owner/reports/export/excel',
+    [ReportController::class, 'exportExcel']
+)->name('owner.reports.export.excel');
     /*
     |--------------------------------------------------------------------------
     | Production / Delivery Status
@@ -774,6 +793,79 @@ Route::middleware(['auth'])->group(function () {
     ->name('job-orders.destroy');
 
 });
+/*
+|--------------------------------------------------------------------------
+| SAMPLE MANAGEMENT
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware(['auth', 'role:owner|admin'])->group(function () {
+
+    Route::get(
+        '/sample-orders',
+        [SampleOrderController::class, 'index']
+    )->name('sample-orders.index');
+
+    // IMPORTANT: create must be BEFORE {sampleOrder}
+    Route::get(
+        '/sample-orders/create',
+        [SampleOrderController::class, 'create']
+    )->name('sample-orders.create');
+
+    Route::post(
+        '/sample-orders',
+        [SampleOrderController::class, 'store']
+    )->name('sample-orders.store');
+
+    Route::get(
+        '/sample-orders/{sampleOrder}',
+        [SampleOrderController::class, 'show']
+    )->name('sample-orders.show');
+
+Route::get(
+    '/sample-orders/{sampleOrder}/items/create',
+    [SampleItemController::class, 'create']
+)->name('sample-items.create');
+
+Route::post(
+    '/sample-orders/{sampleOrder}/items',
+    [SampleItemController::class, 'store']
+)->name('sample-items.store');
+
+Route::get('/sample-items/{sampleItem}/edit', [SampleItemController::class, 'edit'])
+    ->name('sample-items.edit');
+Route::put('/sample-items/{sampleItem}', [SampleItemController::class, 'update'])
+    ->name('sample-items.update');
+Route::delete('/sample-items/{sampleItem}', [SampleItemController::class, 'destroy'])
+    ->name('sample-items.destroy');
+
+Route::post('/sample-orders/{sampleOrder}/photos', [SamplePhotoController::class, 'store'])
+    ->name('sample-photos.store');
+Route::get('/sample-orders/{sampleOrder}/photos/{samplePhoto}', [SamplePhotoController::class, 'show'])
+    ->name('sample-photos.show');
+Route::delete('/sample-orders/{sampleOrder}/photos/{samplePhoto}', [SamplePhotoController::class, 'destroy'])
+    ->name('sample-photos.destroy');
+
+Route::post('/sample-orders/{sampleOrder}/return', [SampleReturnController::class, 'store'])
+    ->name('sample-orders.return.store');
+Route::patch('/sample-orders/{sampleOrder}/status', [SampleOrderController::class, 'updateStatus'])
+    ->name('sample-orders.status.update');
+
+Route::post('/sample-orders/{sampleOrder}/payments', [PaymentController::class, 'store'])
+    ->name('sample-orders.payments.store');
+Route::put('/sample-orders/{sampleOrder}/payments/{payment}', [PaymentController::class, 'update'])
+    ->name('sample-orders.payments.update');
+
+
+});
+
+Route::get('/sample/customer/{customerToken}/photos', [CustomerSamplePhotoController::class, 'show'])
+    ->middleware('throttle:30,1')
+    ->name('customer-sample-photos.show');
+Route::post('/sample/customer/{customerToken}/photos', [CustomerSamplePhotoController::class, 'store'])
+    ->middleware('throttle:10,1')
+    ->name('customer-sample-photos.store');
+
 
 
 require __DIR__ . '/auth.php';

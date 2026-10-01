@@ -30,6 +30,10 @@ class AuthenticatedSessionController extends Controller
 
     $user = auth()->user();
 
+    if ($user->hasRole('developer')) {
+        return redirect()->route('developer.dashboard');
+    }
+
     if ($user->hasRole('owner')) {
         return redirect()->route('owner.dashboard');
     }
