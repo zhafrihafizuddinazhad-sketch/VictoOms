@@ -54,6 +54,10 @@ class SamplePhotoEvidenceTest extends TestCase
             'photo_type' => 'customer_received',
             'photos' => [UploadedFile::fake()->image('invalid.jpg')],
         ])->assertSessionHasErrors('photo_type');
+        $this->post(route('sample-photos.store', $order), [
+            'photo_type' => 'after_return',
+            'photos' => [UploadedFile::fake()->image('too-early.jpg')],
+        ])->assertSessionHasErrors('photo_type');
 
         $this->assertDatabaseCount('sample_photos', 2);
         foreach ($order->photos()->get() as $photo) {
@@ -86,21 +90,29 @@ class SamplePhotoEvidenceTest extends TestCase
         $staff = auth()->user();
         auth()->logout();
         $this->get(route('customer-sample-photos.show', $order->customer_token))
-            ->assertOk()->assertSee('Show the sample after it arrives')
-            ->assertSee('Show the sample condition before sending it back');
-        foreach (['customer_received', 'before_customer_return'] as $checkpoint) {
-            $this->post(route('customer-sample-photos.store', $order->customer_token), [
-                'photo_type' => $checkpoint,
-                'photos' => [UploadedFile::fake()->image($checkpoint . '.jpg')],
-            ])->assertRedirect(route('customer-sample-photos.show', $order->customer_token));
-        }
+            ->assertOk()->assertSee('Please upload a photo showing that you have received the sample.')
+            ->assertSee('name="photo_type" value="customer_received"', false);
+        $this->post(route('customer-sample-photos.store', $order->customer_token), [
+            'photo_type' => 'before_delivery', 'photos' => [UploadedFile::fake()->image('forbidden.jpg')],
+        ])->assertSessionHasErrors('photo_type');
+        $this->post(route('customer-sample-photos.store', $order->customer_token), [
+            'photo_type' => 'customer_received', 'photos' => [UploadedFile::fake()->image('customer_received.jpg')],
+        ])->assertRedirect(route('customer-sample-photos.show', $order->customer_token));
+        $this->get(route('customer-sample-photos.show', $order->customer_token))
+            ->assertOk()->assertSee('Please upload a photo of the sample before returning it.')
+            ->assertSee('name="photo_type" value="before_return"', false);
+        $this->post(route('customer-sample-photos.store', $order->customer_token), [
+            'photo_type' => 'before_return', 'photos' => [UploadedFile::fake()->image('before_return.jpg')],
+        ])->assertRedirect(route('customer-sample-photos.show', $order->customer_token));
         $this->assertDatabaseCount('sample_photos', 3);
         $this->assertDatabaseHas('sample_orders', ['id' => $order->id, 'status' => 'return_pending']);
+        $this->actingAs($staff)->get(route('sample-orders.show', $order))->assertOk()->assertSee('Record Return');
         $this->get(route('customer-sample-photos.show', 'not-a-real-token'))->assertNotFound();
 
         $this->actingAs($staff);
         $this->post(route('sample-orders.return.store', $order), [
             'condition' => 'damaged', 'damage_description' => 'Small tear on the sleeve',
+            'deposit_action' => 'deduct',
             'returned_at' => now()->format('Y-m-d H:i:s'),
         ]);
         $this->post(route('sample-photos.store', $order), [
@@ -108,12 +120,13 @@ class SamplePhotoEvidenceTest extends TestCase
         ]);
         $this->patch(route('sample-orders.status.update', $order), ['status' => 'completed']);
         $this->assertDatabaseHas('sample_orders', ['id' => $order->id, 'status' => 'completed']);
-        $this->assertDatabaseHas('sample_returns', ['sample_order_id' => $order->id, 'condition' => 'damaged']);
+        $this->assertDatabaseHas('sample_returns', ['sample_order_id' => $order->id, 'condition' => 'damaged', 'deposit_action' => 'deduct']);
     }
 
     public function test_office_return_and_inspection_can_be_completed_after_both_photos(): void
     {
         $order = $this->sampleOrder();
+        $order->update(['return_date' => '2020-01-01']);
         $order->update(['deposit_status' => 'paid']);
         $this->patch(route('sample-orders.status.update', $order), ['status' => 'ready_for_collection']);
         $this->post(route('sample-photos.store', $order), [
@@ -122,7 +135,7 @@ class SamplePhotoEvidenceTest extends TestCase
         $this->patch(route('sample-orders.status.update', $order), ['status' => 'collected']);
         $this->patch(route('sample-orders.status.update', $order), ['status' => 'return_pending']);
         $this->post(route('sample-orders.return.store', $order), [
-            'condition' => 'good', 'returned_at' => now()->format('Y-m-d H:i:s'),
+            'condition' => 'good', 'deposit_action' => 'refund', 'returned_at' => now()->format('Y-m-d H:i:s'),
         ])->assertRedirect(route('sample-orders.show', $order));
         $this->post(route('sample-photos.store', $order), [
             'photo_type' => 'after_return', 'photos' => [UploadedFile::fake()->image('after.jpg')],
@@ -131,7 +144,7 @@ class SamplePhotoEvidenceTest extends TestCase
             ->assertRedirect(route('sample-orders.show', $order));
 
         $this->assertDatabaseHas('sample_orders', ['id' => $order->id, 'status' => 'completed']);
-        $this->assertDatabaseHas('sample_returns', ['sample_order_id' => $order->id, 'condition' => 'good']);
+        $this->assertDatabaseHas('sample_returns', ['sample_order_id' => $order->id, 'condition' => 'good', 'deposit_action' => 'refund']);
         $this->get(route('sample-orders.show', $order))->assertOk()->assertSee('Order Completed');
     }
 

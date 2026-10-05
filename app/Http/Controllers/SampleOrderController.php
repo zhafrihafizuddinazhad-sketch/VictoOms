@@ -4,9 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\SampleOrder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
+use Throwable;
 
 class SampleOrderController extends Controller
 {
@@ -24,6 +27,13 @@ class SampleOrderController extends Controller
             'return_date' => 'required|date|after_or_equal:pickup_date',
             'deposit_amount' => 'required|numeric|min:0',
             'notes' => 'nullable|string',
+            'items' => 'nullable|array|max:20',
+            'items.*.item_type' => ['required', Rule::in(['shirt', 'short'])],
+            'items.*.quantity' => 'required|integer|min:1|max:1000',
+            'items.*.fabric' => 'nullable|string|max:255',
+            'items.*.description' => 'nullable|string|max:5000',
+            'sample_photos' => 'nullable|array|max:10',
+            'sample_photos.*' => 'required|image|mimes:jpg,jpeg,png,webp|max:5120',
         ]);
 
         do {
@@ -35,7 +45,43 @@ class SampleOrderController extends Controller
         $validated['status'] = 'pending_payment';
         $validated['customer_token'] = Str::uuid();
 
-        $sampleOrder = SampleOrder::create($validated);
+        $items = $validated['items'] ?? [];
+        $photos = $validated['sample_photos'] ?? [];
+        unset($validated['items'], $validated['sample_photos']);
+        $storedPaths = [];
+
+        try {
+            $sampleOrder = DB::transaction(function () use ($validated, $items, $photos, $request, &$storedPaths): SampleOrder {
+                $order = SampleOrder::create($validated);
+
+                foreach ($items as $item) {
+                    $order->sampleItems()->create($item);
+                }
+
+                foreach ($photos as $photo) {
+                    $path = $photo->store("sample-orders/{$order->id}/photos", 'local');
+                    if (! $path) {
+                        throw new \RuntimeException('The sample photo could not be stored.');
+                    }
+                    $storedPaths[] = $path;
+                    $order->photos()->create([
+                        'photo_type' => 'original',
+                        'uploaded_by_user_id' => $request->user()->id,
+                        'uploaded_by_customer' => false,
+                        'file_path' => $path,
+                    ]);
+                }
+
+                return $order;
+            });
+        } catch (Throwable $exception) {
+            Storage::disk('local')->delete($storedPaths);
+            report($exception);
+
+            return redirect()->route('sample-orders.create')
+                ->withInput($request->except('sample_photos'))
+                ->withErrors(['order' => 'The sample order could not be saved. Please try again.']);
+        }
 
         return redirect()
             ->route('sample-orders.show', $sampleOrder)
@@ -44,7 +90,7 @@ class SampleOrderController extends Controller
 
     public function index()
     {
-        $query = SampleOrder::query();
+        $query = SampleOrder::query()->with('customer');
 
         if (request()->filled('search')) {
             $search = request('search');
@@ -95,21 +141,25 @@ class SampleOrderController extends Controller
     public function show(SampleOrder $sampleOrder)
     {
         $sampleOrder->load([
+            'customer',
             'sampleItems.sample',
             'payments.confirmedBy',
             'photos',
             'sampleReturn',
+            'events',
         ]);
+        $depositSatisfied = $sampleOrder->depositIsSatisfied();
+        $samplePhotos = $sampleOrder->photos->where('photo_type', 'original')->values();
         $photoCheckpoints = $sampleOrder->collection_method === 'office'
             ? [
-                ['key' => 'before_handover', 'legacy' => [], 'label' => 'Before Handover', 'description' => 'Photograph the sample just before the customer collects it.', 'customer' => false],
-                ['key' => 'after_return', 'legacy' => [], 'label' => 'After Return', 'description' => 'Photograph the sample after it is returned to Victo.', 'customer' => false],
+                ['key' => 'before_handover', 'legacy' => [], 'label' => 'Before Handover', 'description' => 'Photograph the sample just before the customer collects it.', 'customer' => false, 'available' => $sampleOrder->status === 'ready_for_collection' && $depositSatisfied],
+                ['key' => 'after_return', 'legacy' => [], 'label' => 'After Return', 'description' => 'Photograph the sample after it is returned to Victo.', 'customer' => false, 'available' => $sampleOrder->status === 'returned'],
             ]
             : [
-                ['key' => 'before_delivery', 'legacy' => ['before_handover'], 'label' => 'Before Delivery', 'description' => 'Photograph the sample before handing it to Lalamove.', 'customer' => false],
-                ['key' => 'customer_received', 'legacy' => [], 'label' => 'Customer Received', 'description' => 'The customer uploads a photo after receiving the sample.', 'customer' => true],
-                ['key' => 'before_customer_return', 'legacy' => ['before_return'], 'label' => 'Before Customer Return', 'description' => 'The customer uploads a photo before returning the sample.', 'customer' => true],
-                ['key' => 'after_return', 'legacy' => [], 'label' => 'After Return', 'description' => 'Photograph the sample after it arrives back at the office.', 'customer' => false],
+                ['key' => 'before_delivery', 'legacy' => ['before_handover'], 'label' => 'Before Delivery', 'description' => 'Photograph the sample before handing it to Lalamove.', 'customer' => false, 'available' => $sampleOrder->status === 'pending_payment' && $depositSatisfied],
+                ['key' => 'customer_received', 'legacy' => [], 'label' => 'Customer Received', 'description' => 'The customer uploads a photo after receiving the sample.', 'customer' => true, 'available' => false],
+                ['key' => 'before_return', 'legacy' => ['before_customer_return'], 'label' => 'Before Return', 'description' => 'The customer uploads a photo before returning the sample.', 'customer' => true, 'available' => false],
+                ['key' => 'after_return', 'legacy' => [], 'label' => 'After Return', 'description' => 'Photograph the sample after it arrives back at the office.', 'customer' => false, 'available' => $sampleOrder->status === 'returned'],
             ];
 
         $photosByCheckpoint = collect($photoCheckpoints)->mapWithKeys(function (array $checkpoint) use ($sampleOrder): array {
@@ -120,7 +170,7 @@ class SampleOrderController extends Controller
             ? route('customer-sample-photos.show', $sampleOrder->customer_token)
             : null;
 
-        return view('sample-orders.show', compact('sampleOrder', 'photosByCheckpoint', 'photoCheckpoints', 'customerPhotoUrl'));
+        return view('sample-orders.show', compact('sampleOrder', 'samplePhotos', 'photosByCheckpoint', 'photoCheckpoints', 'customerPhotoUrl'));
     }
 
     public function updateStatus(Request $request, SampleOrder $sampleOrder)
@@ -129,30 +179,44 @@ class SampleOrderController extends Controller
             'status' => ['required', Rule::in(['ready_for_collection', 'collected', 'in_transit', 'return_pending', 'completed'])],
         ]);
         $next = $data['status'];
-        $office = $sampleOrder->collection_method === 'office';
-        $depositSatisfied = (float) $sampleOrder->deposit_amount <= 0 || $sampleOrder->deposit_status === 'paid';
-        $photoTypes = $sampleOrder->photos()->pluck('photo_type')->all();
+        DB::transaction(function () use ($request, $sampleOrder, $next): void {
+            $lockedOrder = SampleOrder::query()->lockForUpdate()->findOrFail($sampleOrder->id);
+            $office = $lockedOrder->collection_method === 'office';
+            $depositSatisfied = $lockedOrder->depositIsSatisfied();
+            $photoTypes = $lockedOrder->photos()->pluck('photo_type')->all();
 
-        $allowed = match ($next) {
-            'ready_for_collection' => $office && $sampleOrder->status === 'pending_payment' && $depositSatisfied,
-            'collected' => $office && $sampleOrder->status === 'ready_for_collection'
-                && in_array('before_handover', $photoTypes, true),
-            'in_transit' => ! $office && $sampleOrder->status === 'pending_payment' && $depositSatisfied
-                && (in_array('before_delivery', $photoTypes, true) || in_array('before_handover', $photoTypes, true)),
-            'return_pending' => $office && $sampleOrder->status === 'collected',
-            'completed' => $sampleOrder->status === 'returned'
-                && $sampleOrder->sampleReturn()->exists()
-                && in_array('after_return', $photoTypes, true),
-            default => false,
-        };
+            $allowed = match ($next) {
+                'ready_for_collection' => $office && $lockedOrder->status === 'pending_payment' && $depositSatisfied,
+                'collected' => $office && $lockedOrder->status === 'ready_for_collection'
+                    && in_array('before_handover', $photoTypes, true),
+                'in_transit' => ! $office && $lockedOrder->status === 'pending_payment' && $depositSatisfied
+                    && (in_array('before_delivery', $photoTypes, true) || in_array('before_handover', $photoTypes, true)),
+                'return_pending' => $office && $lockedOrder->status === 'collected',
+                'completed' => $lockedOrder->status === 'returned'
+                    && $lockedOrder->sampleReturn()->exists()
+                    && in_array('after_return', $photoTypes, true),
+                default => false,
+            };
 
-        if (! $allowed) {
-            throw ValidationException::withMessages([
-                'status' => 'This step is not available yet. Check the deposit, collection method, and required photos.',
+            if (! $allowed) {
+                throw ValidationException::withMessages([
+                    'status' => 'This step is not available yet. Check the deposit, collection method, and required photos.',
+                ]);
+            }
+
+            $lockedOrder->update(['status' => $next]);
+            $eventKey = match ($next) {
+                'ready_for_collection' => 'prepared_for_pickup',
+                'collected' => 'customer_collected',
+                'in_transit' => 'sent_with_lalamove',
+                'return_pending' => 'return_expected',
+                'completed' => 'order_completed',
+            };
+            $lockedOrder->events()->create([
+                'event_key' => $eventKey,
+                'user_id' => $request->user()->id,
             ]);
-        }
-
-        $sampleOrder->update(['status' => $next]);
+        });
 
         return redirect()
             ->route('sample-orders.show', $sampleOrder)

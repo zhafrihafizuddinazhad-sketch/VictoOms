@@ -9,35 +9,27 @@
             @if(session('success'))<div class="alert alert-success" role="status">{{ session('success') }}</div>@endif
             @if($errors->any())<div class="alert alert-danger" role="alert"><strong>Please check your upload.</strong><ul class="mb-0 mt-2">@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div>@endif
 
-            <p class="mb-3">Choose the photo update you are sending. Please make sure the sample is clearly visible.</p>
-            <form action="{{ route('customer-sample-photos.store', $customerToken) }}" method="POST" enctype="multipart/form-data" id="customer-photo-form">
-                @csrf
-                <fieldset class="mb-4">
-                    <legend class="form-label font-weight-bold">What does this photo show?</legend>
-                    <label class="d-flex align-items-start border rounded p-3 mb-2" for="purpose-received" style="cursor:pointer">
-                        <input class="mt-1 mr-2" type="radio" name="photo_type" id="purpose-received" value="customer_received" @checked(old('photo_type', 'customer_received') === 'customer_received') required>
-                        <span><strong>I've received the sample</strong><span class="d-block small text-muted">Show the sample after it arrives.</span></span>
-                    </label>
-                    <label class="d-flex align-items-start border rounded p-3" for="purpose-return" style="cursor:pointer">
-                        <input class="mt-1 mr-2" type="radio" name="photo_type" id="purpose-return" value="before_customer_return" @checked(old('photo_type') === 'before_customer_return') required>
-                        <span><strong>I'm preparing to return it</strong><span class="d-block small text-muted">Show the sample condition before sending it back.</span></span>
-                    </label>
-                </fieldset>
+            <p class="mb-3">{{ $customerMessage }}</p>
+            @if($photoPurpose)
+                <form action="{{ route('customer-sample-photos.store', $customerToken) }}" method="POST" enctype="multipart/form-data" id="customer-photo-form">
+                    @csrf
+                    <input type="hidden" name="photo_type" value="{{ $photoPurpose }}">
 
-                <div class="mb-3">
-                    <label for="customer-photos" class="form-label font-weight-bold">Choose photos</label>
-                    <input type="file" name="photos[]" id="customer-photos" class="form-control-file d-block w-100 border rounded p-2" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" multiple required>
-                    <small class="form-text text-muted">JPG, PNG, or WebP · up to 5 photos · 5 MB each</small>
-                </div>
-                <div id="photo-preview" class="row mb-3" aria-live="polite"></div>
+                    <div class="mb-3">
+                        <label for="customer-photos" class="form-label font-weight-bold">Take or choose a photo</label>
+                        <input type="file" name="photos[]" id="customer-photos" class="form-control-file d-block w-100 border rounded p-2" accept="image/*" capture="environment" multiple required>
+                        <small class="form-text text-muted">JPG, PNG, or WebP · up to 5 photos · 5 MB each</small>
+                    </div>
+                    <div id="photo-preview" class="row mb-3" aria-live="polite"></div>
 
-                <div class="mb-4">
-                    <label for="photo-notes" class="form-label">Note <span class="text-muted">(optional)</span></label>
-                    <input type="text" name="notes" id="photo-notes" class="form-control" maxlength="500" value="{{ old('notes') }}" placeholder="Add a short note if needed">
-                </div>
+                    <div class="mb-4">
+                        <label for="photo-notes" class="form-label">Note <span class="text-muted">(optional)</span></label>
+                        <input type="text" name="notes" id="photo-notes" class="form-control" maxlength="500" value="{{ old('notes') }}" placeholder="Add a short note if needed">
+                    </div>
 
-                <button type="submit" class="btn btn-primary btn-lg btn-block" id="submit-photos">Submit Photo</button>
-            </form>
+                    <button type="submit" class="btn btn-primary btn-lg btn-block" id="submit-photos">Submit Photo</button>
+                </form>
+            @endif
         </div>
     </div>
 
@@ -46,6 +38,7 @@
             const input = document.getElementById('customer-photos');
             const preview = document.getElementById('photo-preview');
             const form = document.getElementById('customer-photo-form');
+            if (!input || !form) return;
             const button = document.getElementById('submit-photos');
             input.addEventListener('change', () => {
                 preview.replaceChildren();

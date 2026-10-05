@@ -26,11 +26,11 @@ class SamplePhotoController extends Controller
         ]);
 
         $checkpoint = $validated['photo_type'];
-        $depositSatisfied = (float) $sampleOrder->deposit_amount <= 0 || $sampleOrder->deposit_status === 'paid';
+        $depositSatisfied = $sampleOrder->depositIsSatisfied();
         $checkpointReady = match ($checkpoint) {
             'before_handover' => $sampleOrder->status === 'ready_for_collection' && $depositSatisfied,
             'before_delivery' => $sampleOrder->status === 'pending_payment' && $depositSatisfied,
-            'after_return' => $sampleOrder->sampleReturn()->exists(),
+            'after_return' => $sampleOrder->status === 'returned' && $sampleOrder->sampleReturn()->exists(),
             default => false,
         };
         if (! $checkpointReady) {

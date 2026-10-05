@@ -9,6 +9,7 @@ return new class extends Migration
 {
     private array $checkpoints = [
         'before_handover',
+        'sample',
         'before_delivery',
         'customer_received',
         'before_return',
@@ -25,6 +26,10 @@ return new class extends Migration
 
     public function down(): void
     {
+        if (DB::table('sample_photos')->where('photo_type', 'sample')->exists()) {
+            throw new RuntimeException('Cannot roll back sample photo support while sample photos exist.');
+        }
+
         DB::table('sample_photos')
             ->where('photo_type', 'before_delivery')
             ->update(['photo_type' => 'before_handover']);

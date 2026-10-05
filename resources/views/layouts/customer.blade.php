@@ -13,10 +13,10 @@
     <main class="container py-4 py-md-5" style="max-width:680px">
         <header class="text-center mb-4">
             <img src="{{ asset('images/victo-logo.png') }}?v=20260917" alt="Victo" style="height:56px;max-width:200px;object-fit:contain">
-            <div class="small text-muted mt-2">Sample Photo Update</div>
+            <div class="small text-muted mt-2">{{ $subtitle ?? 'Sample Photo Update' }}</div>
         </header>
         @yield('content')
-        <footer class="text-center text-muted small mt-4">Victo OMS · Need help? Contact your Victo representative.</footer>
+        <footer class="text-center text-muted small mt-4">Victo OMS · Contact Victo if you need help with your request.</footer>
     </main>
 </body>
 </html>

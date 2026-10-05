@@ -94,6 +94,10 @@ class PaymentController extends Controller
             && $sampleOrder->collection_method === 'office'
             && $sampleOrder->status === 'pending_payment') {
             $sampleOrder->update(['status' => 'ready_for_collection']);
+            $sampleOrder->events()->create([
+                'event_key' => 'prepared_for_pickup',
+                'user_id' => auth()->id(),
+            ]);
         }
     }
 }

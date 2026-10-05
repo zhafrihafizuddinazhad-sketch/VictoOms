@@ -32,6 +32,7 @@ use App\Http\Controllers\SamplePhotoController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\SampleReturnController;
 use App\Http\Controllers\CustomerSamplePhotoController;
+use App\Http\Controllers\CustomerSampleRequestController;
 use App\Http\Controllers\DeveloperController;
 
 
@@ -858,6 +859,16 @@ Route::put('/sample-orders/{sampleOrder}/payments/{payment}', [PaymentController
 
 
 });
+
+Route::get('/sample-request', [CustomerSampleRequestController::class, 'create'])
+    ->middleware('throttle:60,1')
+    ->name('customer.sample-request.create');
+Route::post('/sample-request', [CustomerSampleRequestController::class, 'store'])
+    ->middleware('throttle:5,1')
+    ->name('customer.sample-request.store');
+Route::get('/sample-request/success', [CustomerSampleRequestController::class, 'success'])
+    ->middleware('throttle:30,1')
+    ->name('customer.sample-request.success');
 
 Route::get('/sample/customer/{customerToken}/photos', [CustomerSamplePhotoController::class, 'show'])
     ->middleware('throttle:30,1')

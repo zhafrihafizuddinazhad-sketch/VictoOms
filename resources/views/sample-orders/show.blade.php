@@ -72,7 +72,7 @@
     </div>
 
     @php
-        $depositReady = (float) $sampleOrder->deposit_amount <= 0 || $sampleOrder->deposit_status === 'paid';
+        $depositReady = $sampleOrder->depositIsSatisfied();
         $orderPhotoTypes = $sampleOrder->photos->pluck('photo_type');
         $hasHandoverPhoto = $sampleOrder->collection_method === 'office'
             ? $orderPhotoTypes->contains('before_handover')
@@ -104,6 +104,8 @@
                 @else <span class="small text-muted">Upload the Before Handover photo before confirming collection.</span> @endif
             @elseif($sampleOrder->collection_method === 'office' && $sampleOrder->status === 'collected')
                 <form action="{{ route('sample-orders.status.update', $sampleOrder) }}" method="POST">@csrf @method('PATCH')<input type="hidden" name="status" value="return_pending"><button class="btn btn-outline-secondary" type="submit">Mark Return Expected</button></form>
+            @elseif($sampleOrder->status === 'return_pending')
+                <a href="#return-inspection" class="btn btn-primary">Record Return</a>
             @elseif($sampleOrder->collection_method !== 'office' && in_array($sampleOrder->status, ['in_transit', 'received'], true))
                 <div class="d-flex flex-wrap align-items-center gap-2"><span class="small text-muted">Share the customer photo link:</span><a href="{{ $customerPhotoUrl }}" class="btn btn-sm btn-outline-primary" target="_blank" rel="noopener">Open Customer Upload Page</a></div>
             @elseif($sampleOrder->status === 'returned')
@@ -135,6 +137,10 @@
                 <div class="fw-semibold">
                     {{ $sampleOrder->customer_name ?? '-' }}
                 </div>
+                @if($sampleOrder->created_source === 'customer')<span class="badge bg-info text-dark mt-2">Customer submitted</span>@endif
+                @if($sampleOrder->customer?->phone)<div class="mt-2">Phone: {{ $sampleOrder->customer->phone }}</div>@endif
+                @if($sampleOrder->customer?->email)<div>Email: {{ $sampleOrder->customer->email }}</div>@endif
+                @if($sampleOrder->customer?->company)<div>Company: {{ $sampleOrder->customer->company }}</div>@endif
 
             </div>
 
@@ -168,14 +174,18 @@
             <div class="mb-3">
 
                 <div class="text-muted small">
-                    Pickup Date
+                    {{ $sampleOrder->collection_method === 'lalamove' ? 'Preferred Delivery Date' : 'Pickup Date' }}
                 </div>
 
                 <div>
-                    {{ $sampleOrder->pickup_date?->format('d M Y') ?? '-' }}
+                    {{ ($sampleOrder->collection_method === 'lalamove' ? $sampleOrder->delivery_date : $sampleOrder->pickup_date)?->format('d M Y') ?? '-' }}
                 </div>
 
             </div>
+
+            @if($sampleOrder->collection_method === 'lalamove')
+                <div class="mb-3"><div class="text-muted small">Delivery Address</div><div class="fw-semibold">{{ $sampleOrder->delivery_address ?? '-' }}</div></div>
+            @endif
 
 
             <div>
@@ -333,6 +343,33 @@
     </div>
 
 
+    {{-- Original sample photos, separate from workflow evidence --}}
+    <section class="card mb-4" aria-labelledby="sample-photos-heading">
+        <div class="card-header"><strong id="sample-photos-heading">Sample Photos</strong></div>
+        <div class="card-body">
+            <p class="text-muted small">Original photos showing the sample provided to the customer.</p>
+            @if($samplePhotos->isNotEmpty())
+                <div class="row g-3">
+                    @foreach($samplePhotos as $photo)
+                        <div class="col-6 col-sm-4 col-md-3 col-xl-2">
+                            <div class="border rounded p-2 h-100">
+                                <a href="{{ route('sample-photos.show', [$sampleOrder, $photo]) }}" target="_blank" rel="noopener" aria-label="Open original sample photo">
+                                    <img src="{{ route('sample-photos.show', [$sampleOrder, $photo]) }}" alt="Original sample photo" class="img-fluid rounded w-100" style="height:130px;object-fit:cover">
+                                </a>
+                                <div class="d-flex justify-content-between align-items-center gap-1 mt-2"><span class="small text-muted">{{ $photo->created_at?->format('d M Y') }}</span>
+                                    <form action="{{ route('sample-photos.destroy', [$sampleOrder, $photo]) }}" method="POST" onsubmit="return confirm('Delete this sample photo?')">@csrf @method('DELETE')<button type="submit" class="btn btn-sm btn-outline-danger">Delete</button></form>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            @else
+                <p class="mb-0 text-muted">No original sample photos were added during order creation.</p>
+            @endif
+        </div>
+    </section>
+
+
     {{-- Additional Information --}}
     <div class="card mb-5">
 
@@ -438,18 +475,20 @@
                     @if($sampleOrder->sampleReturn)
                         <div class="mb-2"><span class="text-muted">Condition</span><div class="fw-semibold">{{ $sampleOrder->sampleReturn->condition === 'lost' ? 'Missing' : ucfirst($sampleOrder->sampleReturn->condition) }}</div></div>
                         <div class="mb-2"><span class="text-muted">Returned</span><div>{{ $sampleOrder->sampleReturn->returned_at?->format('d M Y, h:i A') ?? 'Not recorded' }}</div></div>
+                        @if($sampleOrder->sampleReturn->deposit_action)<div class="mb-2"><span class="text-muted">Deposit action</span><div>{{ ucwords(str_replace('_', ' ', $sampleOrder->sampleReturn->deposit_action)) }}</div></div>@endif
                         @if($sampleOrder->sampleReturn->receivedBy)<div class="mb-2"><span class="text-muted">Received by</span><div>{{ $sampleOrder->sampleReturn->receivedBy->name }}</div></div>@endif
                         @if($sampleOrder->sampleReturn->damage_description)<div class="mb-2"><span class="text-muted">Inspection details</span><div>{{ $sampleOrder->sampleReturn->damage_description }}</div></div>@endif
                         @if($sampleOrder->sampleReturn->notes)<div class="mb-3"><span class="text-muted">Notes</span><div>{{ $sampleOrder->sampleReturn->notes }}</div></div>@endif
                     @else <p class="text-muted mb-3">No return has been recorded.</p> @endif
 
-                    @if($sampleOrder->sampleReturn || ($sampleOrder->collection_method === 'office' && in_array($sampleOrder->status, ['collected', 'return_pending'], true)) || ($sampleOrder->collection_method !== 'office' && in_array($sampleOrder->status, ['received', 'return_pending'], true)))
-                        <details>
+                    @if($sampleOrder->sampleReturn || $sampleOrder->status === 'return_pending')
+                        <details id="return-inspection" @if($sampleOrder->status === 'return_pending') open @endif>
                             <summary class="btn btn-sm {{ $sampleOrder->sampleReturn ? 'btn-outline-secondary' : 'btn-primary' }}">{{ $sampleOrder->sampleReturn ? 'Update Inspection' : 'Record Sample Return' }}</summary>
                             <form action="{{ route('sample-orders.return.store', $sampleOrder) }}" method="POST" class="border rounded p-3 mt-3" onsubmit="return confirm('Save the sample return and inspection?')">
                                 @csrf
                                 <div class="form-group"><label for="return-datetime">Returned at</label><input id="return-datetime" type="datetime-local" name="returned_at" value="{{ old('returned_at', $sampleOrder->sampleReturn?->returned_at?->format('Y-m-d\\TH:i') ?? now()->format('Y-m-d\\TH:i')) }}" class="form-control" required></div>
-                                <div class="form-group"><label for="return-condition">Condition <span class="text-danger">*</span></label><select id="return-condition" name="condition" class="form-control" required><option value="good" @selected(old('condition', $sampleOrder->sampleReturn?->condition) === 'good')>Good</option><option value="damaged" @selected(old('condition', $sampleOrder->sampleReturn?->condition) === 'damaged')>Damaged</option><option value="lost" @selected(old('condition', $sampleOrder->sampleReturn?->condition) === 'lost')>Missing</option></select></div>
+                                <div class="form-group"><label for="return-condition">Condition <span class="text-danger">*</span></label><select id="return-condition" name="condition" class="form-control" required><option value="good" @selected(old('condition', $sampleOrder->sampleReturn?->condition) === 'good')>Good</option><option value="damaged" @selected(old('condition', $sampleOrder->sampleReturn?->condition) === 'damaged')>Damaged</option><option value="lost" @selected(old('condition', $sampleOrder->sampleReturn?->condition) === 'lost')>Missing</option><option value="other" @selected(old('condition', $sampleOrder->sampleReturn?->condition) === 'other')>Other</option></select></div>
+                                <div class="form-group"><label for="deposit-action">Deposit action</label><select id="deposit-action" name="deposit_action" class="form-control"><option value="">No action selected</option><option value="refund" @selected(old('deposit_action', $sampleOrder->sampleReturn?->deposit_action) === 'refund')>Refund</option><option value="partial_refund" @selected(old('deposit_action', $sampleOrder->sampleReturn?->deposit_action) === 'partial_refund')>Partial refund</option><option value="deduct" @selected(old('deposit_action', $sampleOrder->sampleReturn?->deposit_action) === 'deduct')>Deduct</option><option value="hold" @selected(old('deposit_action', $sampleOrder->sampleReturn?->deposit_action) === 'hold')>Hold</option><option value="forfeit" @selected(old('deposit_action', $sampleOrder->sampleReturn?->deposit_action) === 'forfeit')>Forfeit</option></select></div>
                                 <div class="form-group"><label for="return-damage">Damage / missing details</label><textarea id="return-damage" name="damage_description" rows="2" class="form-control" placeholder="Describe damage or missing items">{{ old('damage_description', $sampleOrder->sampleReturn?->damage_description) }}</textarea></div>
                                 <div class="form-group"><label for="return-notes">Inspection notes</label><textarea id="return-notes" name="notes" rows="2" class="form-control">{{ old('notes', $sampleOrder->sampleReturn?->notes) }}</textarea></div>
                                 <button class="btn btn-primary" type="submit">Save Return Inspection</button>
@@ -506,6 +545,13 @@
 
                             @if($checkpoint['customer'])
                                 <a href="{{ $customerPhotoUrl }}" class="btn btn-sm btn-outline-primary" target="_blank" rel="noopener">Customer uploads this checkpoint</a>
+                            @elseif(! $checkpoint['available'])
+                                <p class="small text-muted mb-0">
+                                    @if($key === 'before_handover') Available after the deposit is ready and the order is prepared for pickup.
+                                    @elseif($key === 'before_delivery') Available after the deposit is paid, before the sample is marked as sent.
+                                    @else Available after staff records the physical return.
+                                    @endif
+                                </p>
                             @else
                                 <form action="{{ route('sample-photos.store', $sampleOrder) }}" method="POST" enctype="multipart/form-data" class="row g-2 align-items-end">
                                     @csrf
@@ -527,18 +573,36 @@
         <div class="card-body">
             @php
                 $timelineEvents = collect([['label' => 'Order Created', 'at' => $sampleOrder->created_at]]);
+                $eventLabels = [
+                    'prepared_for_pickup' => 'Prepared for Pickup',
+                    'sent_with_lalamove' => 'Sent with Lalamove',
+                    'customer_collected' => 'Customer Collection',
+                    'return_expected' => 'Return Expected',
+                    'order_completed' => 'Order Completed',
+                ];
+                foreach ($sampleOrder->events->sortBy('created_at') as $workflowEvent) {
+                    if (isset($eventLabels[$workflowEvent->event_key])) {
+                        $timelineEvents->push(['label' => $eventLabels[$workflowEvent->event_key], 'at' => $workflowEvent->created_at]);
+                    }
+                }
                 $paidPayment = $sampleOrder->payments->where('status', 'paid')->sortBy('paid_at')->first();
                 if ($paidPayment) $timelineEvents->push(['label' => 'Deposit Received', 'at' => $paidPayment->paid_at ?? $paidPayment->created_at]);
                 $handoverPhoto = $photosByCheckpoint->get($sampleOrder->collection_method === 'office' ? 'before_handover' : 'before_delivery', collect())->sortBy('created_at')->first();
                 if ($handoverPhoto) $timelineEvents->push(['label' => $sampleOrder->collection_method === 'office' ? 'Before Handover Photo' : 'Before Delivery Photo', 'at' => $handoverPhoto->created_at]);
                 $receivedPhoto = $photosByCheckpoint->get('customer_received', collect())->sortBy('created_at')->first();
                 if ($receivedPhoto) $timelineEvents->push(['label' => 'Customer Received Photo', 'at' => $receivedPhoto->created_at]);
-                $beforeReturnPhoto = $photosByCheckpoint->get('before_customer_return', collect())->sortBy('created_at')->first();
-                if ($beforeReturnPhoto) $timelineEvents->push(['label' => 'Before Customer Return Photo', 'at' => $beforeReturnPhoto->created_at]);
-                if ($sampleOrder->sampleReturn) $timelineEvents->push(['label' => 'Returned & Inspected · '.($sampleOrder->sampleReturn->condition === 'lost' ? 'Missing' : ucfirst($sampleOrder->sampleReturn->condition)), 'at' => $sampleOrder->sampleReturn->returned_at]);
+                $beforeReturnPhoto = $photosByCheckpoint->get('before_return', collect())->sortBy('created_at')->first();
+                if ($beforeReturnPhoto) $timelineEvents->push(['label' => 'Before Return Photo', 'at' => $beforeReturnPhoto->created_at]);
+                if ($sampleOrder->sampleReturn) {
+                    $timelineEvents->push(['label' => 'Return Recorded', 'at' => $sampleOrder->sampleReturn->returned_at]);
+                    $inspectionCondition = $sampleOrder->sampleReturn->condition === 'lost' ? 'Missing' : ucfirst($sampleOrder->sampleReturn->condition);
+                    $timelineEvents->push(['label' => 'Inspection · '.$inspectionCondition, 'at' => $sampleOrder->sampleReturn->returned_at]);
+                }
                 $afterReturnPhoto = $photosByCheckpoint->get('after_return', collect())->sortBy('created_at')->first();
                 if ($afterReturnPhoto) $timelineEvents->push(['label' => 'After Return Photo', 'at' => $afterReturnPhoto->created_at]);
-                if ($sampleOrder->status === 'completed') $timelineEvents->push(['label' => 'Order Completed', 'at' => null]);
+                if ($sampleOrder->status === 'completed' && ! $sampleOrder->events->contains('event_key', 'order_completed')) {
+                    $timelineEvents->push(['label' => 'Order Completed', 'at' => null]);
+                }
                 $timelineEvents = $timelineEvents->sortBy(fn ($event) => $event['at']?->timestamp ?? PHP_INT_MAX)->values();
             @endphp
             <div class="timeline">

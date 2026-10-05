@@ -59,7 +59,7 @@
                                 <th>Order Number</th>
                                 <th>Customer</th>
                                 <th>Collection</th>
-                                <th>Pickup Date</th>
+                                <th>Pickup / Delivery</th>
                                 <th>Return Date</th>
                                 <th>Deposit</th>
                                 <th>Status</th>
@@ -79,6 +79,8 @@
 
                                     <td>
                                         {{ $order->customer_name ?? '-' }}
+                                        @if($order->created_source === 'customer')<div><span class="badge bg-info text-dark mt-1">Customer submitted</span></div>@endif
+                                        @if($order->customer?->phone)<div class="small text-muted">{{ $order->customer->phone }}</div>@endif
                                     </td>
 
                                     <td>
@@ -86,7 +88,7 @@
                                     </td>
 
                                     <td>
-                                        {{ $order->pickup_date?->format('d M Y') ?? '-' }}
+                                        {{ ($order->collection_method === 'lalamove' ? $order->delivery_date : $order->pickup_date)?->format('d M Y') ?? '-' }}
                                     </td>
 
                                     <td>
@@ -94,7 +96,7 @@
                                     </td>
 
                                     <td>
-                                        RM {{ number_format($order->deposit_amount, 2) }}
+                                        RM {{ number_format($order->deposit_amount, 2) }}<div class="small text-warning-emphasis">{{ ucfirst($order->deposit_status ?? 'pending') }}</div>
                                     </td>
 
                                     <td>

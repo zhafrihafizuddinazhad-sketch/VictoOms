@@ -13,8 +13,9 @@ class SampleReturnController extends Controller
     {
         $data = $request->validate([
             'returned_at' => 'nullable|date',
-            'condition' => 'required|in:good,damaged,lost',
-            'damage_description' => 'nullable|string|max:5000|required_if:condition,damaged,lost',
+            'condition' => 'required|in:good,damaged,lost,other',
+            'deposit_action' => 'nullable|in:refund,partial_refund,forfeit,deduct,hold',
+            'damage_description' => 'nullable|string|max:5000|required_if:condition,damaged,lost,other',
             'notes' => 'nullable|string|max:5000',
         ]);
 
@@ -23,12 +24,9 @@ class SampleReturnController extends Controller
             $existingReturn = $lockedOrder->sampleReturn;
 
             if (! $existingReturn) {
-                $allowedStatuses = $lockedOrder->collection_method === 'office'
-                    ? ['collected', 'return_pending']
-                    : ['received', 'return_pending'];
-                if (! in_array($lockedOrder->status, $allowedStatuses, true)) {
+                if ($lockedOrder->status !== 'return_pending') {
                     throw ValidationException::withMessages([
-                        'condition' => 'The sample must be collected or received before a return can be recorded.',
+                        'condition' => 'Mark the sample as return pending before recording its return.',
                     ]);
                 }
             }
@@ -37,6 +35,7 @@ class SampleReturnController extends Controller
                 'returned_at' => $data['returned_at'] ?? now(),
                 'received_by' => $request->user()->id,
                 'condition' => $data['condition'],
+                'deposit_action' => $data['deposit_action'] ?? null,
                 'damage_description' => $data['damage_description'] ?? null,
                 'notes' => $data['notes'] ?? null,
             ]);

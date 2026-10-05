@@ -5,6 +5,8 @@ namespace Tests\Feature;
 use App\Models\SampleOrder;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
@@ -15,9 +17,35 @@ class SampleOrderCoreTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        Storage::fake('local');
         $user = User::factory()->create();
         $user->assignRole(Role::create(['name' => 'admin', 'guard_name' => 'web']));
         $this->actingAs($user);
+    }
+
+    public function test_order_creation_saves_items_and_original_sample_photos_together(): void
+    {
+        $this->post(route('sample-orders.store'), [
+            'customer_name' => 'Sample Photo Customer',
+            'collection_method' => 'office',
+            'pickup_date' => '2026-10-01',
+            'return_date' => '2026-10-05',
+            'deposit_amount' => 25,
+            'items' => [
+                ['item_type' => 'shirt', 'quantity' => 2, 'fabric' => 'Cotton', 'description' => 'Navy sample'],
+                ['item_type' => 'short', 'quantity' => 1],
+            ],
+            'sample_photos' => [UploadedFile::fake()->image('front.jpg'), UploadedFile::fake()->image('back.png')],
+        ])->assertSessionHasNoErrors();
+
+        $order = SampleOrder::where('customer_name', 'Sample Photo Customer')->firstOrFail();
+        $this->assertDatabaseCount('sample_items', 2);
+        $this->assertDatabaseCount('sample_photos', 2);
+        $this->assertSame(['original', 'original'], $order->photos()->orderBy('id')->pluck('photo_type')->all());
+        foreach ($order->photos as $photo) {
+            Storage::disk('local')->assertExists($photo->file_path);
+        }
+        $this->get(route('sample-orders.show', $order))->assertOk()->assertSee('Sample Photos')->assertSee('Navy sample');
     }
 
     public function test_staff_can_create_sample_order_and_system_generates_order_number_and_customer_token(): void
