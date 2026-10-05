@@ -14,6 +14,7 @@ class SampleItem extends Model
         'sample_order_id',
         'sample_id',
         'item_type',
+        'sample_name',
         'quantity',
         'fabric',
         'description',

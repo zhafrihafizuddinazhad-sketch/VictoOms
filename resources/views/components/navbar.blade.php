@@ -1,13 +1,5 @@
 <nav class="main-header navbar navbar-expand navbar-white navbar-light">
 
-    <ul class="navbar-nav">
-        <li class="nav-item">
-            <a class="nav-link" data-lte-toggle="sidebar" href="#">
-                <i class="fas fa-bars"></i>
-            </a>
-        </li>
-    </ul>
-
     <a href="{{ auth()->user()->hasRole('developer') ? route('developer.dashboard') : (auth()->user()->hasRole('owner') ? route('owner.dashboard') : (auth()->user()->hasRole('admin') ? route('admin.dashboard') : (auth()->user()->hasRole('designer') ? route('designer.dashboard') : route('cameraman.dashboard')))) }}" class="top-brand" aria-label="Victo OMS home">
         <img src="{{ asset('images/victo-logo.png') }}?v=20260917" alt="Victo OMS" class="top-brand__logo">
     </a>

@@ -29,7 +29,8 @@ class CustomerSampleRequestController extends Controller
             'company' => ['nullable', 'string', 'max:255'],
             'email' => ['nullable', 'email', 'max:255'],
             'items' => ['required', 'array', 'min:1', 'max:20'],
-            'items.*.item_type' => ['required', Rule::in(['shirt', 'short'])],
+            'items.*.item_type' => ['required', Rule::in(['shirt', 'short', 'others'])],
+            'items.*.sample_name' => ['nullable', 'required_if:items.*.item_type,others', 'string', 'max:255'],
             'items.*.quantity' => ['required', 'integer', 'min:1', 'max:1000'],
             'items.*.fabric' => ['nullable', 'string', 'max:255'],
             'items.*.description' => ['nullable', 'string', 'max:5000'],
@@ -41,7 +42,15 @@ class CustomerSampleRequestController extends Controller
             'notes' => ['nullable', 'string', 'max:5000'],
         ], [
             'return_date.after_or_equal' => 'The return date must be on or after the pickup or delivery date.',
+            'items.*.sample_name.required_if' => 'Please specify the sample you are borrowing.',
         ]);
+        $validator->after(function ($validator) use ($request): void {
+            foreach ($request->input('items', []) as $index => $item) {
+                if (($item['item_type'] ?? null) === 'others' && blank($item['sample_name'] ?? null)) {
+                    $validator->errors()->add("items.$index.sample_name", 'Please specify the sample you are borrowing.');
+                }
+            }
+        });
         $validator->after(function ($validator) use ($request): void {
             $phoneInput = $request->input('phone');
             $phone = preg_replace('/[\s().-]+/', '', is_string($phoneInput) ? $phoneInput : '');
@@ -99,6 +108,7 @@ class CustomerSampleRequestController extends Controller
                 foreach ($data['items'] as $item) {
                     $order->sampleItems()->create([
                         'item_type' => $item['item_type'],
+                        'sample_name' => $item['item_type'] === 'others' ? trim($item['sample_name']) : null,
                         'quantity' => $item['quantity'],
                         'fabric' => $item['fabric'] ?? null,
                         'description' => $item['description'] ?? null,
@@ -146,7 +156,8 @@ class CustomerSampleRequestController extends Controller
             $lines[] = '';
             $lines[] = 'Items:';
             foreach ($sampleOrder->sampleItems as $index => $item) {
-                $line = ($index + 1) . '. ' . ucfirst($item->item_type) . ' · Qty ' . $item->quantity;
+                $itemLabel = $item->item_type === 'others' ? 'Others — ' . $item->sample_name : ucfirst($item->item_type);
+                $line = ($index + 1) . '. ' . $itemLabel . ' · Qty ' . $item->quantity;
                 if ($item->fabric) $line .= ' · ' . $item->fabric;
                 $lines[] = $line;
             }

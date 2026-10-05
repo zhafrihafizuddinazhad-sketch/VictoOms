@@ -1,277 +1,50 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 
 @section('content')
-
-<div class="container-fluid">
-
-    @if(session('success'))<div class="alert alert-success">{{ session('success') }}</div>@endif
-    @if($errors->any())
-        <div class="alert alert-danger"><strong>Some information needs attention.</strong><ul class="mb-0 mt-2">@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div>
-    @endif
-
-    {{-- Page Header --}}
-    <div class="d-flex justify-content-between align-items-center mb-4">
-
-        <div>
-            <h1 class="h3 mb-1">Sample Order Details</h1>
-
-            <p class="text-muted mb-0">
-                View complete information for this sample order.
-            </p>
-        </div>
-
-        <a href="{{ route('sample-orders.index') }}"
-           class="btn btn-secondary">
-            ← Back
-        </a>
-
-    </div>
-
-
-    {{-- Order Information --}}
-    <div class="card mb-4">
-
-        <div class="card-body">
-
-            <div class="mb-3">
-
-                <div class="text-muted small">
-                    Order Number
-                </div>
-
-                <div class="fw-bold fs-5">
-                    {{ $sampleOrder->order_number }}
-                </div>
-
-            </div>
-
-
-            <div class="mb-3">
-
-                <div class="text-muted small">
-                    Created
-                </div>
-
-                <div>
-                    {{ $sampleOrder->created_at?->format('d M Y, h:i A') ?? '-' }}
-                </div>
-
-            </div>
-
-
-            <div>
-
-                <span class="badge {{ $sampleOrder->status === 'completed' ? 'bg-success' : ($sampleOrder->status === 'cancelled' ? 'bg-danger' : 'bg-primary') }}">
-                    {{ ucwords(str_replace('_', ' ', $sampleOrder->status)) }}
-                </span>
-
-            </div>
-
-        </div>
-
-    </div>
-
-    @php
-        $depositReady = $sampleOrder->depositIsSatisfied();
-        $orderPhotoTypes = $sampleOrder->photos->pluck('photo_type');
-        $hasHandoverPhoto = $sampleOrder->collection_method === 'office'
-            ? $orderPhotoTypes->contains('before_handover')
-            : ($orderPhotoTypes->contains('before_delivery') || $orderPhotoTypes->contains('before_handover'));
-        $hasAfterReturnPhoto = $orderPhotoTypes->contains('after_return');
-    @endphp
-    <div class="card mb-4 border-primary">
-        <div class="card-header bg-white d-flex justify-content-between align-items-center"><strong>Collection Progress</strong><span class="badge bg-primary">{{ ucwords(str_replace('_', ' ', $sampleOrder->status)) }}</span></div>
-        <div class="card-body d-flex flex-wrap align-items-center justify-content-between gap-3">
-            <div class="flex-grow-1">
-                @if($sampleOrder->collection_method === 'office')
-                    <strong>Office pickup</strong><p class="small text-muted mb-0">The customer completes this order form when they arrive at Victo.</p>
-                @else
-                    <strong>Lalamove (arranged manually)</strong><p class="small text-muted mb-0">Coordinate delivery with the customer using WhatsApp. VictoOMS does not book or track the driver.</p>
-                @endif
-            </div>
-            @if($sampleOrder->status === 'pending_payment' && $sampleOrder->collection_method === 'office')
-                @if($depositReady)
-                    <form action="{{ route('sample-orders.status.update', $sampleOrder) }}" method="POST">@csrf @method('PATCH')<input type="hidden" name="status" value="ready_for_collection"><button class="btn btn-outline-primary" type="submit">Prepare for Pickup</button></form>
-                @else <span class="small text-muted">Record the deposit before preparing the order.</span> @endif
-            @elseif($sampleOrder->status === 'pending_payment' && $sampleOrder->collection_method !== 'office')
-                @if($depositReady && $hasHandoverPhoto)
-                    <form action="{{ route('sample-orders.status.update', $sampleOrder) }}" method="POST" onsubmit="return confirm('Mark this sample as sent with Lalamove?')">@csrf @method('PATCH')<input type="hidden" name="status" value="in_transit"><button class="btn btn-outline-primary" type="submit">Mark Sent with Lalamove</button></form>
-                @elseif(! $depositReady) <span class="small text-muted">Record the deposit before arranging delivery.</span>
-                @else <span class="small text-muted">Upload the Before Delivery photo before arranging Lalamove.</span> @endif
-            @elseif($sampleOrder->status === 'ready_for_collection')
-                @if($hasHandoverPhoto)
-                    <form action="{{ route('sample-orders.status.update', $sampleOrder) }}" method="POST" onsubmit="return confirm('Confirm that the customer has collected the sample?')">@csrf @method('PATCH')<input type="hidden" name="status" value="collected"><button class="btn btn-outline-primary" type="submit">Confirm Customer Collection</button></form>
-                @else <span class="small text-muted">Upload the Before Handover photo before confirming collection.</span> @endif
-            @elseif($sampleOrder->collection_method === 'office' && $sampleOrder->status === 'collected')
-                <form action="{{ route('sample-orders.status.update', $sampleOrder) }}" method="POST">@csrf @method('PATCH')<input type="hidden" name="status" value="return_pending"><button class="btn btn-outline-secondary" type="submit">Mark Return Expected</button></form>
-            @elseif($sampleOrder->status === 'return_pending')
-                <a href="#return-inspection" class="btn btn-primary">Record Return</a>
-            @elseif($sampleOrder->collection_method !== 'office' && in_array($sampleOrder->status, ['in_transit', 'received'], true))
-                <div class="d-flex flex-wrap align-items-center gap-2"><span class="small text-muted">Share the customer photo link:</span><a href="{{ $customerPhotoUrl }}" class="btn btn-sm btn-outline-primary" target="_blank" rel="noopener">Open Customer Upload Page</a></div>
-            @elseif($sampleOrder->status === 'returned')
-                @if($hasAfterReturnPhoto)
-                    <form action="{{ route('sample-orders.status.update', $sampleOrder) }}" method="POST" onsubmit="return confirm('Complete this sample order?')">@csrf @method('PATCH')<input type="hidden" name="status" value="completed"><button class="btn btn-success" type="submit">Complete Sample Order</button></form>
-                @else <span class="small text-muted">Upload the After Return photo before completing this order.</span> @endif
-            @elseif($sampleOrder->status === 'completed')
-                <span class="text-success fw-semibold">Sample order complete</span>
-            @endif
-        </div>
-    </div>
-
-
-    {{-- Customer Information --}}
-    <div class="card mb-4">
-
-        <div class="card-header">
-            <strong>Customer Information</strong>
-        </div>
-
-        <div class="card-body">
-
-            <div class="mb-3">
-
-                <div class="text-muted small">
-                    Customer Name
-                </div>
-
-                <div class="fw-semibold">
-                    {{ $sampleOrder->customer_name ?? '-' }}
-                </div>
-                @if($sampleOrder->created_source === 'customer')<span class="badge bg-info text-dark mt-2">Customer submitted</span>@endif
-                @if($sampleOrder->customer?->phone)<div class="mt-2">Phone: {{ $sampleOrder->customer->phone }}</div>@endif
-                @if($sampleOrder->customer?->email)<div>Email: {{ $sampleOrder->customer->email }}</div>@endif
-                @if($sampleOrder->customer?->company)<div>Company: {{ $sampleOrder->customer->company }}</div>@endif
-
-            </div>
-
-        </div>
-
-    </div>
-
-
-    {{-- Collection Information --}}
-    <div class="card mb-4">
-
-        <div class="card-header">
-            <strong>Collection Information</strong>
-        </div>
-
-        <div class="card-body">
-
-            <div class="mb-3">
-
-                <div class="text-muted small">
-                    Collection Method
-                </div>
-
-                <div class="fw-semibold">
-                    {{ ucfirst($sampleOrder->collection_method ?? '-') }}
-                </div>
-
-            </div>
-
-
-            <div class="mb-3">
-
-                <div class="text-muted small">
-                    {{ $sampleOrder->collection_method === 'lalamove' ? 'Preferred Delivery Date' : 'Pickup Date' }}
-                </div>
-
-                <div>
-                    {{ ($sampleOrder->collection_method === 'lalamove' ? $sampleOrder->delivery_date : $sampleOrder->pickup_date)?->format('d M Y') ?? '-' }}
-                </div>
-
-            </div>
-
-            @if($sampleOrder->collection_method === 'lalamove')
-                <div class="mb-3"><div class="text-muted small">Delivery Address</div><div class="fw-semibold">{{ $sampleOrder->delivery_address ?? '-' }}</div></div>
-            @endif
-
-
-            <div>
-
-                <div class="text-muted small">
-                    Return Date
-                </div>
-
-                <div>
-                    {{ $sampleOrder->return_date?->format('d M Y') ?? '-' }}
-                </div>
-
-            </div>
-
-        </div>
-
-    </div>
-
-
-    {{-- Payment Information --}}
-    <div class="card mb-4">
-
-        <div class="card-header">
-            <strong>Payment Information</strong>
-        </div>
-
-        <div class="card-body">
-
-            <div class="mb-3">
-
-                <div class="text-muted small">
-                    Deposit Amount
-                </div>
-
-                <div class="fw-semibold">
-                    RM {{ number_format($sampleOrder->deposit_amount ?? 0, 2) }}
-                </div>
-
-            </div>
-
-
-            <div>
-
-                <div class="text-muted small">
-                    Deposit Status
-                </div>
-
-                <div class="fw-semibold">
-                    {{ ucwords(str_replace('_', ' ', $sampleOrder->deposit_status ?? '-')) }}
-                </div>
-
-            </div>
-
-        </div>
-
-    </div>
-
-
-    {{-- Notes --}}
-    <div class="card mb-4">
-
-        <div class="card-header">
-            <strong>Notes</strong>
-        </div>
-
-        <div class="card-body">
-
-            @if($sampleOrder->notes)
-
-                <p class="mb-0">
-                    {{ $sampleOrder->notes }}
-                </p>
-
-            @else
-
-                <span class="text-muted">
-                    No notes provided.
-                </span>
-
-            @endif
-
-        </div>
-
-    </div>
-
-
+<style>
+.sample-order-page .card{border:1px solid #e5eaf2;border-radius:14px;box-shadow:0 6px 22px rgba(21,44,79,.045);overflow:hidden}.sample-order-page .card-header{background:#fff;border-bottom:1px solid #edf0f5;padding:16px 20px}.sample-order-page .card-body{padding:20px}.sample-order-page .order-hero{background:linear-gradient(135deg,#142b51,#2458a6);border-radius:18px;color:#fff;padding:24px;margin-bottom:20px}.sample-order-page .order-stat{background:#fff;border:1px solid #e5eaf2;border-radius:12px;padding:16px;height:100%}.sample-order-page .order-stat .label{font-size:.75rem;text-transform:uppercase;letter-spacing:.06em;color:#74839a;font-weight:700}.sample-order-page .order-stat .value{font-weight:700;margin-top:5px;overflow-wrap:anywhere}.sample-order-page .item-card{background:#f8fafd;border:1px solid #e8edf4;border-radius:12px;padding:16px;height:100%}.sample-order-page .timeline-event{position:relative;border-left:2px solid #dbe5f2;padding:0 0 20px 20px;margin-left:8px}.sample-order-page .timeline-event:last-child{border-left-color:transparent;padding-bottom:0}.sample-order-page .timeline-dot{position:absolute;left:-7px;top:2px;width:12px;height:12px;border-radius:50%;background:#2864ae;border:2px solid #fff;box-shadow:0 0 0 1px #2864ae}
+@media(max-width:575px){.sample-order-page .order-hero{padding:20px;border-radius:14px}.sample-order-page .card-header{padding:14px 16px}.sample-order-page .card-body{padding:16px}.sample-order-page .order-stat{padding:13px}}
+</style>
+<div class="container-fluid sample-order-page pb-4">
+@if(session('success'))<div class="alert alert-success">{{ session('success') }}</div>@endif
+@if($errors->any())<div class="alert alert-danger"><strong>Some information needs attention.</strong><ul class="mb-0 mt-2">@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div>@endif
+
+@php
+$depositReady=$sampleOrder->depositIsSatisfied();
+$orderPhotoTypes=$sampleOrder->photos->pluck('photo_type');
+$hasHandoverPhoto=$sampleOrder->collection_method==='office'?$orderPhotoTypes->contains('before_handover'):($orderPhotoTypes->contains('before_delivery')||$orderPhotoTypes->contains('before_handover'));
+$hasAfterReturnPhoto=$orderPhotoTypes->contains('after_return');
+$statusLabel=ucwords(str_replace('_',' ',$sampleOrder->status));
+$methodLabel=$sampleOrder->collection_method==='office'?'Office Pickup':'Lalamove';
+$dateLabel=$sampleOrder->collection_method==='lalamove'?'Delivery Date':'Pickup Date';
+$primaryDate=$sampleOrder->collection_method==='lalamove'?$sampleOrder->delivery_date:$sampleOrder->pickup_date;
+@endphp
+<header class="order-hero d-flex flex-wrap justify-content-between align-items-start gap-3">
+<div><div class="small text-uppercase font-weight-bold" style="letter-spacing:.08em;opacity:.72">Sample Order</div><h1 class="h3 mt-2 mb-2">{{ $sampleOrder->order_number }}</h1><div class="d-flex flex-wrap align-items-center gap-2"><span class="badge badge-light px-2 py-1">{{ $statusLabel }}</span><span class="badge badge-light px-2 py-1">{{ $methodLabel }}</span>@if($sampleOrder->created_source==='customer')<span class="badge badge-info px-2 py-1">Customer submitted</span>@endif</div></div>
+<a href="{{ route('sample-orders.index') }}" class="btn btn-light">← Sample Orders</a>
+</header>
+
+<section class="card mb-4 border-primary" aria-labelledby="next-step-heading"><div class="card-body d-flex flex-wrap align-items-center justify-content-between gap-3">
+<div class="flex-grow-1"><div class="small text-uppercase text-primary font-weight-bold" id="next-step-heading">Next step</div>@if($sampleOrder->collection_method==='office')<div class="font-weight-bold mt-1">Office Pickup</div><p class="small text-muted mb-0">The customer collects the sample at Victo. Record each handover and return checkpoint below.</p>@else<div class="font-weight-bold mt-1">Lalamove delivery</div><p class="small text-muted mb-0">Coordinate delivery directly with the customer. VictoOMS does not book or track the driver.</p>@endif</div>
+@if($sampleOrder->status==='pending_payment'&&$sampleOrder->collection_method==='office')@if($depositReady)<form action="{{ route('sample-orders.status.update',$sampleOrder) }}" method="POST">@csrf @method('PATCH')<input type="hidden" name="status" value="ready_for_collection"><button class="btn btn-primary" type="submit">Prepare for Pickup</button></form>@else<a href="#payment-panel" class="btn btn-primary">Record Payment</a>@endif
+@elseif($sampleOrder->status==='pending_payment'&&$sampleOrder->collection_method!=='office')@if($depositReady&&$hasHandoverPhoto)<form action="{{ route('sample-orders.status.update',$sampleOrder) }}" method="POST" onsubmit="return confirm('Mark this sample as sent with Lalamove?')">@csrf @method('PATCH')<input type="hidden" name="status" value="in_transit"><button class="btn btn-primary" type="submit">Mark Sent with Lalamove</button></form>@elseif(!$depositReady)<a href="#payment-panel" class="btn btn-primary">Record Payment</a>@else<a href="#photo-evidence-heading" class="btn btn-primary">Upload Before Delivery</a>@endif
+@elseif($sampleOrder->status==='ready_for_collection')@if($hasHandoverPhoto)<form action="{{ route('sample-orders.status.update',$sampleOrder) }}" method="POST" onsubmit="return confirm('Confirm that the customer has collected the sample?')">@csrf @method('PATCH')<input type="hidden" name="status" value="collected"><button class="btn btn-primary" type="submit">Confirm Customer Collection</button></form>@else<a href="#photo-evidence-heading" class="btn btn-primary">Upload Before Handover</a>@endif
+@elseif($sampleOrder->collection_method==='office'&&$sampleOrder->status==='collected')<form action="{{ route('sample-orders.status.update',$sampleOrder) }}" method="POST">@csrf @method('PATCH')<input type="hidden" name="status" value="return_pending"><button class="btn btn-outline-primary" type="submit">Mark Return Expected</button></form>
+@elseif($sampleOrder->status==='return_pending')<a href="#return-inspection" class="btn btn-primary">Record Return</a>
+@elseif($sampleOrder->collection_method!=='office'&&in_array($sampleOrder->status,['in_transit','received'],true))<a href="{{ $customerPhotoUrl }}" class="btn btn-outline-primary" target="_blank" rel="noopener">Open Customer Upload Page</a>
+@elseif($sampleOrder->status==='returned')@if($hasAfterReturnPhoto)<form action="{{ route('sample-orders.status.update',$sampleOrder) }}" method="POST" onsubmit="return confirm('Complete this sample order?')">@csrf @method('PATCH')<input type="hidden" name="status" value="completed"><button class="btn btn-success" type="submit">Complete Sample Order</button></form>@else<a href="#photo-evidence-heading" class="btn btn-primary">Upload After Return</a>@endif
+@elseif($sampleOrder->status==='completed')<span class="text-success font-weight-bold"><i class="fas fa-check-circle mr-1"></i>Sample order complete</span>@endif
+</div></section>
+
+<section class="row row-cols-2 row-cols-md-3 row-cols-xl-6 g-3 mb-4" aria-label="Order summary">
+<div class="col"><div class="order-stat"><div class="label">Status</div><div class="value">{{ $statusLabel }}</div></div></div><div class="col"><div class="order-stat"><div class="label">Collection</div><div class="value">{{ $methodLabel }}</div></div></div><div class="col"><div class="order-stat"><div class="label">{{ $dateLabel }}</div><div class="value">{{ $primaryDate?->format('d M Y')??'—' }}</div></div></div><div class="col"><div class="order-stat"><div class="label">Return date</div><div class="value">{{ $sampleOrder->return_date?->format('d M Y')??'—' }}</div></div></div><div class="col"><div class="order-stat"><div class="label">Deposit</div><div class="value">RM {{ number_format((float)$sampleOrder->deposit_amount,2) }}</div><span class="badge {{ $sampleOrder->deposit_status==='paid'?'badge-success':'badge-warning' }}">{{ ucfirst($sampleOrder->deposit_status) }}</span></div></div><div class="col"><div class="order-stat"><div class="label">Created</div><div class="value">{{ $sampleOrder->created_at?->format('d M Y')??'—' }}</div></div></div>
+</section>
+
+<div class="row g-3 mb-4">
+<div class="col-lg-6"><section class="card h-100"><div class="card-header"><strong><i class="far fa-user mr-2 text-primary"></i>Customer Information</strong></div><div class="card-body"><div class="h5 mb-1">{{ $sampleOrder->customer_name??'—' }}</div>@if($sampleOrder->customer?->company)<div class="text-muted mb-3">{{ $sampleOrder->customer->company }}</div>@endif<div class="row g-3"><div class="col-sm-6"><div class="small text-muted">Phone</div><div class="font-weight-semibold">{{ $sampleOrder->customer?->phone??'—' }}</div></div><div class="col-sm-6"><div class="small text-muted">Email</div><div class="font-weight-semibold text-break">{{ $sampleOrder->customer?->email??'—' }}</div></div></div></div></section></div>
+<div class="col-lg-6"><section class="card h-100"><div class="card-header"><strong><i class="fas fa-map-marker-alt mr-2 text-primary"></i>Collection Information</strong></div><div class="card-body"><div class="mb-3"><div class="small text-muted">Collection method</div><div class="font-weight-semibold">{{ $methodLabel }}</div></div><div class="mb-3"><div class="small text-muted">{{ $dateLabel }}</div><div>{{ $primaryDate?->format('d M Y')??'—' }}</div></div>@if($sampleOrder->collection_method==='lalamove')<div class="mb-3"><div class="small text-muted">Delivery address</div><div class="text-break">{{ $sampleOrder->delivery_address??'—' }}</div></div>@endif<div><div class="small text-muted">Return date</div><div>{{ $sampleOrder->return_date?->format('d M Y')??'—' }}</div></div></div></section></div>
+</div>
+@if($sampleOrder->notes)<section class="card mb-4"><div class="card-header"><strong>Additional Notes</strong></div><div class="card-body">{{ $sampleOrder->notes }}</div></section>@endif
     {{-- Sample Items --}}
     <div class="card mb-4">
 
@@ -283,49 +56,18 @@
         <div class="card-body">
 
             @if($sampleOrder->sampleItems && $sampleOrder->sampleItems->count())
-
-                <div class="table-responsive">
-
-                    <table class="table table-bordered">
-
-                        <thead>
-                            <tr>
-                                <th>Item</th><th>Quantity</th><th>Fabric</th><th>Physical sample</th><th>Description</th><th class="text-end">Actions</th>
-                            </tr>
-                        </thead>
-
-                        <tbody>
-
-                            @foreach($sampleOrder->sampleItems as $item)
-
-                                <tr>
-
-                                    <td>
-                                        {{ ucfirst($item->item_type ?? '-') }}
-                                    </td>
-
-                                    <td>
-                                        {{ $item->quantity ?? '-' }}
-                                    </td>
-                                    <td>{{ $item->fabric ?: '-' }}</td>
-                                    <td>{{ $item->sample?->sample_code ?? '—' }}</td>
-                                    <td>{{ $item->description ?: '-' }}</td>
-                                    <td class="text-end text-nowrap">
-                                        <a href="{{ route('sample-items.edit', $item) }}" class="btn btn-sm btn-outline-primary">Edit</a>
-                                        <form action="{{ route('sample-items.destroy', $item) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to remove this sample item? This action cannot be undone.')">
-                                            @csrf @method('DELETE')
-                                            <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
-                                        </form>
-                                    </td>
-
-                                </tr>
-
-                            @endforeach
-
-                        </tbody>
-
-                    </table>
-
+                <div class="row g-3">
+                    @foreach($sampleOrder->sampleItems as $index => $item)
+                        <div class="col-12 col-lg-6"><article class="item-card">
+                            <div class="d-flex justify-content-between align-items-start gap-2 mb-3"><div><span class="small text-muted">Item {{ $index + 1 }}</span><h3 class="h5 mb-0">{{ $item->item_type === 'others' ? 'Others' : ucfirst($item->item_type ?? '-') }}</h3>@if($item->item_type === 'others' && $item->sample_name)<div class="h6 text-primary font-weight-bold mt-1 mb-0">{{ $item->sample_name }}</div>@endif</div><span class="badge badge-primary">Qty {{ $item->quantity ?? '—' }}</span></div>
+                            <div class="row g-2 small">
+                                @if($item->fabric)<div class="col-sm-6"><span class="text-muted">Fabric</span><div class="font-weight-semibold">{{ $item->fabric }}</div></div>@endif
+                                @if($item->sample?->sample_code)<div class="col-sm-6"><span class="text-muted">Physical sample</span><div>{{ $item->sample->sample_code }}</div></div>@endif
+                                @if($item->description)<div class="col-12"><span class="text-muted">Description</span><div class="text-break">{{ $item->description }}</div></div>@endif
+                            </div>
+                            <div class="d-flex flex-wrap gap-2 mt-3"><a href="{{ route('sample-items.edit', $item) }}" class="btn btn-sm btn-outline-primary">Edit</a><form action="{{ route('sample-items.destroy', $item) }}" method="POST" onsubmit="return confirm('Are you sure you want to remove this sample item? This action cannot be undone.')">@csrf @method('DELETE')<button type="submit" class="btn btn-sm btn-outline-danger">Remove</button></form></div>
+                        </article></div>
+                    @endforeach
                 </div>
 
             @else
@@ -345,7 +87,7 @@
 
     {{-- Original sample photos, separate from workflow evidence --}}
     <section class="card mb-4" aria-labelledby="sample-photos-heading">
-        <div class="card-header"><strong id="sample-photos-heading">Sample Photos</strong></div>
+        <div class="card-header"><strong id="sample-photos-heading">Original Sample Photos</strong></div>
         <div class="card-body">
             <p class="text-muted small">Original photos showing the sample provided to the customer.</p>
             @if($samplePhotos->isNotEmpty())
@@ -370,34 +112,9 @@
     </section>
 
 
-    {{-- Additional Information --}}
-    <div class="card mb-5">
-
-        <div class="card-header">
-            <strong>Additional Information</strong>
-        </div>
-
-        <div class="card-body">
-
-            <div>
-
-                <div class="text-muted small">
-                    Order ID
-                </div>
-
-                <div>
-                    {{ $sampleOrder->id }}
-                </div>
-
-            </div>
-
-        </div>
-
-    </div>
-
     <div class="row g-4 mb-4">
-        <div class="col-lg-7">
-            <div class="card h-100">
+        <div class="col-lg-7" id="payment-panel">
+            <div class="card h-100" id="payment-panel-card">
                 <div class="card-header d-flex justify-content-between align-items-center"><strong>Payment / Deposit</strong><span class="badge {{ $sampleOrder->deposit_status === 'paid' ? 'bg-success' : ($sampleOrder->deposit_status === 'refunded' ? 'bg-info text-dark' : 'bg-warning text-dark') }}">{{ ucwords(str_replace('_', ' ', $sampleOrder->deposit_status)) }}</span></div>
                 <div class="card-body">
                     <div class="mb-3"><div class="small text-muted">Deposit required</div><div class="fs-4 fw-semibold">RM {{ number_format((float) $sampleOrder->deposit_amount, 2) }}</div></div>
@@ -607,9 +324,9 @@
             @endphp
             <div class="timeline">
                 @foreach($timelineEvents as $event)
-                    <div class="d-flex align-items-start border-left pl-3 pb-3">
-                        <span class="badge bg-success mr-2">✓</span>
-                        <div><strong>{{ $event['label'] }}</strong>@if($event['at'])<div class="small text-muted">{{ $event['at']->format('d M Y, h:i A') }}</div>@endif</div>
+                    <div class="timeline-event">
+                        <span class="timeline-dot" aria-hidden="true"></span>
+                        <div><strong>{{ $event['label'] }}</strong>@if($event['at'])<div class="small text-muted mt-1">{{ $event['at']->format('d M Y, h:i A') }}</div>@endif</div>
                     </div>
                 @endforeach
             </div>

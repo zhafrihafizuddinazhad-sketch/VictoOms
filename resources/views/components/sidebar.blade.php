@@ -178,6 +178,8 @@
                     </li>
 
 
+
+
                     {{-- Orders --}}
 
                     <li class="nav-item">
@@ -201,37 +203,13 @@
                     </li>
 
                     <li class="nav-item">
-                        <a href="{{ route('sample-orders.index') }}" class="nav-link {{ request()->routeIs('sample-orders.*', 'sample-items.*') ? 'active' : '' }}">
-                            <i class="nav-icon fas fa-box-open"></i><p>Sample Management</p>
-                        </a>
-                    </li>
-
-
-
-                    
-                    {{-- Designer Monitoring --}}
-
-                    <li class="nav-item">
-
-                        <a
-                            href="{{ route('designer.monitoring') }}"
-                            class="nav-link
-                            {{ request()->routeIs('designer.monitoring') ? 'active' : '' }}"
-                        >
-
+                        <a href="{{ route('designer.monitoring') }}" class="nav-link {{ request()->routeIs('designer.monitoring') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-user-pen"></i>
-
-                            <p>
-
-                                Designer Monitoring
-
-                            </p>
-
+                            <p>Designer Monitoring</p>
                         </a>
-
                     </li>
+<li class="nav-item">
 
-                    <li class="nav-item">
     <a href="{{ route('owner.reports') }}"
        class="nav-link {{ request()->routeIs('owner.reports') ? 'active' : '' }}">
         <i class="nav-icon fas fa-chart-bar"></i>
@@ -381,13 +359,6 @@
 
                     </li>
 
-                    <li class="nav-item">
-                        <a href="{{ route('sample-orders.index') }}" class="nav-link {{ request()->routeIs('sample-orders.*', 'sample-items.*') ? 'active' : '' }}">
-                            <i class="nav-icon fas fa-box-open"></i><p>Sample Management</p>
-                        </a>
-                    </li>
-
-
                     {{-- ========================= --}}
                     {{-- MONITORING --}}
                     {{-- ========================= --}}
@@ -399,29 +370,15 @@
                     </li>
 
 
-                    {{-- Designer Monitoring --}}
+
+
 
                     <li class="nav-item">
-
-                        <a
-                            href="{{ route('designer.monitoring') }}"
-                            class="nav-link
-                            {{ request()->routeIs('designer.monitoring') ? 'active' : '' }}"
-                        >
-
+                        <a href="{{ route('designer.monitoring') }}" class="nav-link {{ request()->routeIs('designer.monitoring') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-user-pen"></i>
-
-                            <p>
-
-                                Designer Monitoring
-
-                            </p>
-
+                            <p>Designer Monitoring</p>
                         </a>
-
                     </li>
-
-
                     {{-- Cameraman Monitoring --}}
 
                     <li class="nav-item">
@@ -598,6 +555,21 @@
     </a>
 
 </li>
+
+
+{{-- Sample Management is a separate module for Owner and Admin. --}}
+@if($user->hasRole('owner') || $user->hasRole('admin'))
+<li class="nav-header">SAMPLE MANAGEMENT</li>
+
+<li class="nav-item">
+    <a href="{{ route('sample-orders.index') }}" class="nav-link {{ request()->routeIs('sample-orders.*', 'sample-items.*') ? 'active' : '' }}">
+        <i class="nav-icon fas fa-box-open"></i>
+        <p>Sample Orders</p>
+    </a>
+</li>
+
+
+@endif
 
 
 {{-- Help --}}

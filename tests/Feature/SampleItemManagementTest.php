@@ -96,4 +96,23 @@ class SampleItemManagementTest extends TestCase
 
         $this->assertDatabaseCount('sample_items', 0);
     }
+
+    public function test_other_item_requires_and_saves_sample_name(): void
+    {
+        $order = $this->sampleOrder();
+        $this->from(route('sample-items.create', $order))
+            ->post(route('sample-items.store', $order), ['item_type' => 'others', 'quantity' => 1])
+            ->assertSessionHasErrors(['sample_name']);
+
+        $this->post(route('sample-items.store', $order), [
+            'item_type' => 'others', 'sample_name' => 'Display Stand', 'quantity' => 1,
+            'description' => 'Counter display stand',
+        ])->assertRedirect(route('sample-orders.show', $order));
+
+        $this->assertDatabaseHas('sample_items', [
+            'sample_order_id' => $order->id, 'item_type' => 'others',
+            'sample_name' => 'Display Stand', 'quantity' => 1,
+        ]);
+        $this->get(route('sample-orders.show', $order))->assertOk()->assertSee('Display Stand');
+    }
 }

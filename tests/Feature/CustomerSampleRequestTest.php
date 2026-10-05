@@ -113,6 +113,35 @@ class CustomerSampleRequestTest extends TestCase
             ->assertDontSee('12%20Jalan%20Contoh', false);
     }
 
+    public function test_customer_can_request_other_sample_with_a_required_sample_name(): void
+    {
+        $data = $this->officeRequest([
+            'items' => [
+                ['item_type' => 'others', 'sample_name' => 'Banner', 'quantity' => 2, 'description' => 'Promotional banner'],
+                ['item_type' => 'shirt', 'quantity' => 1, 'fabric' => 'Cotton'],
+            ],
+        ]);
+
+        $this->post(route('customer.sample-request.store'), $data)->assertRedirect(route('customer.sample-request.success'));
+        $order = SampleOrder::with('sampleItems')->firstOrFail();
+        $this->assertCount(2, $order->sampleItems);
+        $this->assertSame('others', $order->sampleItems[0]->item_type);
+        $this->assertSame('Banner', $order->sampleItems[0]->sample_name);
+        $this->assertSame('shirt', $order->sampleItems[1]->item_type);
+        $this->assertNull($order->sampleItems[1]->sample_name);
+    }
+
+    public function test_customer_other_item_requires_a_sample_name(): void
+    {
+        $this->from(route('customer.sample-request.create'))
+            ->post(route('customer.sample-request.store'), $this->officeRequest([
+                'items' => [['item_type' => 'others', 'sample_name' => '', 'quantity' => 1]],
+            ]))
+            ->assertSessionHasErrors(['items.0.sample_name']);
+
+        $this->assertDatabaseCount('sample_orders', 0);
+    }
+
     public function test_existing_customer_is_reused_and_contact_details_are_updated_without_duplicate(): void
     {
         $customer = Customer::create(['customer_name' => 'Old Name', 'phone' => '0123456789', 'company' => 'Old Company']);

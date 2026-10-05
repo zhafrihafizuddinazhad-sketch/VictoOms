@@ -66,6 +66,24 @@ body.hold-transition {
     box-shadow: none;
 }
 
+/* Keep the sidebar background at viewport height while its menu scrolls independently. */
+.wrapper { min-height: 100vh; }
+.main-sidebar.sidebar-dark-primary {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    min-height: 100vh;
+}
+.main-sidebar.sidebar-dark-primary > .sidebar {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
 .brand-link {
     height: 74px;
     display: flex !important;

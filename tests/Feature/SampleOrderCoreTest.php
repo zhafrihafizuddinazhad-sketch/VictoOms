@@ -108,6 +108,97 @@ class SampleOrderCoreTest extends TestCase
         $this->assertDatabaseCount('sample_orders', 0);
     }
 
+    public function test_staff_create_form_uses_customer_request_fields_and_item_controls(): void
+    {
+        $this->get(route('sample-orders.create'))
+            ->assertOk()
+            ->assertSee('Full name')
+            ->assertSee('Phone number')
+            ->assertSee('Add another sample')
+            ->assertSee('Others')
+            ->assertSee('Please specify the sample you are borrowing')
+            ->assertSee('Delivery address')
+            ->assertSee('Pickup date')
+            ->assertSee('Deposit amount')
+            ->assertSee('SAMPLE MANAGEMENT')
+            ->assertSee('Sample Orders');
+    }
+
+    public function test_staff_can_create_lalamove_order_with_other_and_standard_items(): void
+    {
+        $this->post(route('sample-orders.store'), [
+            'full_name' => 'Hana Customer', 'phone' => '012 345 6789',
+            'company' => 'Hana Studio', 'email' => 'hana@example.test',
+            'collection_method' => 'lalamove', 'delivery_date' => '2026-10-07',
+            'delivery_address' => '12 Jalan Contoh, Kuala Lumpur', 'return_date' => '2026-10-12',
+            'deposit_amount' => 35, 'notes' => 'Please confirm before dispatch.',
+            'items' => [
+                ['item_type' => 'others', 'sample_name' => 'Table Cloth', 'quantity' => 2, 'description' => 'Round display table'],
+                ['item_type' => 'shirt', 'quantity' => 1, 'fabric' => 'Microfiber'],
+            ],
+        ])->assertRedirectContains('/sample-orders/');
+
+        $order = SampleOrder::with('customer', 'sampleItems')->firstOrFail();
+        $this->assertSame('Hana Customer', $order->customer_name);
+        $this->assertSame('0123456789', $order->customer->phone);
+        $this->assertSame('Hana Studio', $order->customer->company);
+        $this->assertSame('lalamove', $order->collection_method);
+        $this->assertSame('2026-10-07', $order->delivery_date->format('Y-m-d'));
+        $this->assertNull($order->pickup_date);
+        $this->assertSame('Table Cloth', $order->sampleItems[0]->sample_name);
+        $this->assertNull($order->sampleItems[1]->sample_name);
+        $this->assertSame('pending_payment', $order->status);
+        $this->assertSame('pending', $order->deposit_status);
+        $this->get(route('sample-orders.show', $order))->assertOk()->assertSee('Table Cloth');
+    }
+
+    public function test_staff_can_create_office_order_using_the_shared_customer_fields(): void
+    {
+        $this->post(route('sample-orders.store'), [
+            'full_name' => 'Aina Office', 'phone' => '0123456789', 'company' => 'Aina Apparel',
+            'email' => 'aina@example.test', 'collection_method' => 'office',
+            'pickup_date' => '2026-10-07', 'return_date' => '2026-10-12',
+            'deposit_amount' => 20, 'items' => [['item_type' => 'shirt', 'quantity' => 2]],
+        ])->assertRedirectContains('/sample-orders/');
+
+        $order = SampleOrder::with('customer', 'sampleItems')->firstOrFail();
+        $this->assertSame('office', $order->collection_method);
+        $this->assertSame('2026-10-07', $order->pickup_date->format('Y-m-d'));
+        $this->assertNull($order->delivery_date);
+        $this->assertNull($order->delivery_address);
+        $this->assertSame('aina@example.test', $order->customer->email);
+        $this->assertSame('shirt', $order->sampleItems[0]->item_type);
+        $this->assertNull($order->sampleItems[0]->sample_name);
+    }
+
+    public function test_staff_cannot_create_other_item_without_sample_name(): void
+    {
+        $this->from(route('sample-orders.create'))
+            ->post(route('sample-orders.store'), [
+                'full_name' => 'Hana Customer', 'phone' => '0123456789',
+                'collection_method' => 'office', 'pickup_date' => '2026-10-07',
+                'return_date' => '2026-10-12', 'deposit_amount' => 35,
+                'items' => [['item_type' => 'others', 'sample_name' => '', 'quantity' => 1]],
+            ])
+            ->assertSessionHasErrors(['items.0.sample_name']);
+
+        $this->assertDatabaseCount('sample_orders', 0);
+        $this->assertDatabaseCount('customers', 0);
+    }
+
+    public function test_sample_management_sidebar_is_visible_to_owner_and_hidden_from_other_roles(): void
+    {
+        $owner = User::factory()->create();
+        $owner->assignRole(Role::create(['name' => 'owner', 'guard_name' => 'web']));
+        $this->actingAs($owner)->get(route('sample-orders.index'))
+            ->assertOk()->assertSee('SAMPLE MANAGEMENT')->assertSee('Sample Orders');
+
+        $designer = User::factory()->create();
+        $designer->assignRole(Role::create(['name' => 'designer', 'guard_name' => 'web']));
+        $this->actingAs($designer)->get(route('sample-orders.index'))->assertForbidden();
+        $this->get(route('designer.dashboard'))->assertOk()->assertDontSee('SAMPLE MANAGEMENT')->assertDontSee('Sample Orders');
+    }
+
     public function test_order_list_searches_references_and_filters_upcoming_returns(): void
     {
         $due = SampleOrder::create([

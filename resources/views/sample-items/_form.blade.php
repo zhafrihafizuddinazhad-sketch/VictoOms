@@ -15,8 +15,14 @@
                         <option value="">Select item type</option>
                         <option value="shirt" @selected(old('item_type', $sampleItem->item_type ?? '') === 'shirt')>Shirt</option>
                         <option value="short" @selected(old('item_type', $sampleItem->item_type ?? '') === 'short')>Short</option>
+                        <option value="others" @selected(old('item_type', $sampleItem->item_type ?? '') === 'others')>Others</option>
                     </select>
                     @error('item_type')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                </div>
+                <div class="col-md-6" id="sample-name-group" @if(old('item_type', $sampleItem->item_type ?? '') !== 'others') hidden @endif>
+                    <label for="sample_name" class="form-label">Sample name <span class="text-danger">*</span></label>
+                    <input type="text" name="sample_name" id="sample_name" class="form-control @error('sample_name') is-invalid @enderror" value="{{ old('sample_name', $sampleItem->sample_name ?? '') }}" maxlength="255" placeholder="Please specify the sample you are borrowing" @if(old('item_type', $sampleItem->item_type ?? '') === 'others') required @else disabled @endif>
+                    @error('sample_name')<div class="invalid-feedback">{{ $message }}</div>@enderror
                 </div>
                 <div class="col-md-6">
                     <label for="quantity" class="form-label">Quantity <span class="text-danger">*</span></label>
@@ -24,9 +30,9 @@
                     @error('quantity')<div class="invalid-feedback">{{ $message }}</div>@enderror
                 </div>
                 <div class="col-md-6">
-                    <label for="fabric" class="form-label">Fabric</label>
-                    <input type="text" name="fabric" id="fabric" class="form-control @error('fabric') is-invalid @enderror" value="{{ old('fabric', $sampleItem->fabric ?? '') }}" placeholder="e.g. Cotton, Microfiber, Polyester">
-                    @error('fabric')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                    <div id="fabric-group" @if(old('item_type', $sampleItem->item_type ?? '') === 'others') hidden @endif><label for="fabric" class="form-label">Fabric <span class="text-muted">(optional)</span></label>
+                    <input type="text" name="fabric" id="fabric" class="form-control @error('fabric') is-invalid @enderror" value="{{ old('fabric', $sampleItem->fabric ?? '') }}" placeholder="e.g. Cotton, Microfiber, Polyester" @if(old('item_type', $sampleItem->item_type ?? '') === 'others') disabled @endif>
+                    @error('fabric')<div class="invalid-feedback">{{ $message }}</div>@enderror</div>
                 </div>
                 <div class="col-md-6">
                     <label for="sample_id" class="form-label">Physical sample <span class="text-muted">(optional)</span></label>
@@ -51,3 +57,6 @@
         </form>
     </div>
 </div>
+<script>
+(() => { const type=document.getElementById('item_type'); const nameGroup=document.getElementById('sample-name-group'); const name=document.getElementById('sample_name'); const fabricGroup=document.getElementById('fabric-group'); const fabric=document.getElementById('fabric'); const sync=()=>{const other=type.value==='others';nameGroup.hidden=!other;name.required=other;name.disabled=!other;fabricGroup.hidden=other;fabric.disabled=other;};type.addEventListener('change',sync);sync(); })();
+</script>
