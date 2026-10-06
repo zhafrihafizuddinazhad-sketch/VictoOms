@@ -122,6 +122,26 @@
                             <i class="nav-icon fas fa-code"></i><p>Developer Console</p>
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a href="{{ route('accounts.index') }}" class="nav-link {{ request()->routeIs('accounts.*') ? 'active' : '' }}">
+                            <i class="nav-icon fas fa-users-cog"></i><p>Account Management</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ route('developer.activity') }}" class="nav-link {{ request()->routeIs('developer.activity') ? 'active' : '' }}">
+                            <i class="nav-icon fas fa-clipboard-list"></i><p>System Activity</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ route('developer.health') }}" class="nav-link {{ request()->routeIs('developer.health') ? 'active' : '' }}">
+                            <i class="nav-icon fas fa-heartbeat"></i><p>System Health</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ route('developer.maintenance') }}" class="nav-link {{ request()->routeIs('developer.maintenance*') ? 'active' : '' }}">
+                            <i class="nav-icon fas fa-tools"></i><p>Maintenance Mode</p>
+                        </a>
+                    </li>
                 @endif
 
 

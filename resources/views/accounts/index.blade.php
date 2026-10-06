@@ -14,9 +14,7 @@
                 Account Management
             </h1>
 
-            <p class="text-muted mb-0">
-                Manage VictoOMS staff accounts.
-            </p>
+            <p class="text-muted mb-0">Manage VictoOMS staff accounts and account status.</p>
         </div>
 
         <a href="{{ route('accounts.create') }}" class="btn btn-primary">
@@ -107,6 +105,7 @@
                                         <strong>
                                             {{ $staff->name }}
                                         </strong>
+                                        <a href="{{ route('accounts.show', $staff) }}" class="small ml-2">View</a>
 
                                     </div>
                                 </td>
@@ -144,6 +143,18 @@
                                         </span>
 
                                     @endforeach
+
+                                    @if(auth()->user()->hasRole('developer') && $staff->id !== auth()->id())
+                                        <form action="{{ route('accounts.role', $staff) }}" method="POST" class="d-flex mt-2" aria-label="Change role for {{ $staff->name }}">
+                                            @csrf @method('PATCH')
+                                            <select name="role" class="form-control form-control-sm" aria-label="New role">
+                                                @foreach(['owner', 'admin', 'designer', 'cameraman', 'developer'] as $roleOption)
+                                                    <option value="{{ $roleOption }}" {{ $staff->hasRole($roleOption) ? 'selected' : '' }}>{{ ucfirst($roleOption) }}</option>
+                                                @endforeach
+                                            </select>
+                                            <button type="submit" class="btn btn-sm btn-outline-primary ml-1">Save</button>
+                                        </form>
+                                    @endif
 
                                 </td>
 

@@ -102,7 +102,13 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::middleware(['auth', 'role:developer'])->prefix('developer')->name('developer.')->group(function () {
+    Route::get('/', fn () => redirect()->route('developer.dashboard'))->name('home');
     Route::get('/dashboard', [DeveloperController::class, 'index'])->name('dashboard');
+    Route::get('/accounts', fn () => redirect()->route('accounts.index'))->name('accounts');
+    Route::get('/activity', [DeveloperController::class, 'activity'])->name('activity');
+    Route::get('/system-health', [DeveloperController::class, 'health'])->name('health');
+    Route::get('/maintenance', [DeveloperController::class, 'maintenancePage'])->name('maintenance');
+    Route::post('/maintenance', [DeveloperController::class, 'maintenance'])->name('maintenance.toggle');
     Route::post('/impersonate/{user}', [DeveloperController::class, 'impersonate'])->name('impersonate');
 });
 
@@ -593,7 +599,7 @@ Route::middleware(['auth', 'role:cameraman'])->group(function () {
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth', 'role:owner|admin'])->group(function () {
+Route::middleware(['auth', 'role:owner|admin|developer'])->group(function () {
 
     Route::get('/accounts', [AccountController::class, 'index'])
         ->name('accounts.index');
@@ -603,6 +609,12 @@ Route::middleware(['auth', 'role:owner|admin'])->group(function () {
 
     Route::post('/accounts', [AccountController::class, 'store'])
         ->name('accounts.store');
+
+    Route::get('/accounts/{user}', [AccountController::class, 'show'])
+        ->whereNumber('user')->name('accounts.show');
+
+    Route::patch('/accounts/{user}/role', [AccountController::class, 'updateRole'])
+        ->name('accounts.role');
 
     Route::patch('/accounts/{user}/deactivate', [AccountController::class, 'deactivate'])
         ->name('accounts.deactivate');

@@ -8,7 +8,6 @@ Alpine.start();
 
 const initializeVictoInteractions = () => {
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
     if (document.body.classList.contains('dashboard-page') && !reducedMotion && 'IntersectionObserver' in window) {
         const revealTargets = document.querySelectorAll('.content-header, .content .small-box, .content .card, .content .alert, .content .dev-hero, .content .card .border-bottom.p-3, .content table tbody tr');
         if (revealTargets.length) {
@@ -33,8 +32,10 @@ const initializeVictoInteractions = () => {
         document.body.append(toast);
         if (toast.classList.contains('victo-toast--success')) {
             window.setTimeout(() => {
-                if (toast.isConnected) toast.remove();
-            }, 6500);
+                if (!toast.isConnected) return;
+                toast.classList.add('is-leaving');
+                window.setTimeout(() => toast.remove(), 260);
+            }, 6200);
         }
     });
 

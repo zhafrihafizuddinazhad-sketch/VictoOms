@@ -392,7 +392,7 @@ body.hold-transition {
 }
 .login-brand,.login-card { position:relative; z-index:1; width:min(100%, 440px); }
 .login-brand { gap:.85rem; margin:0; }
-.login-brand > a { display:flex; flex:0 0 auto; align-items:center; justify-content:center; width:132px; height:48px; padding:.2rem .4rem; background:rgba(7,25,67,.9); border:1px solid rgba(255,255,255,.38); border-radius:12px; box-shadow:0 10px 26px rgba(2,12,40,.2); }
+.login-brand > a { display:flex; flex:0 0 auto; align-items:center; justify-content:center; width:132px; height:48px; padding:.2rem .4rem; background:rgba(7,25,67,.9); border:1px solid rgba(255,255,255,.38); border-radius:12px; box-shadow:0 10px 26px rgba(2,12,40,.2); animation:login-logo-enter .36s .04s ease-out both; }
 .login-brand .victo-logo { width:100%; height:100%; }
 .login-brand > span { color:#fff !important; font-size:1.3rem; text-shadow:0 2px 12px rgba(0,0,0,.25); }
 .login-brand > span span { color:#a9d6ff !important; }
@@ -442,6 +442,7 @@ body.hold-transition {
 .login-form button[type="submit"]:active { transform:translateY(1px) scale(.99); box-shadow:0 3px 8px rgba(24,83,169,.2); }
 .login-form button[type="submit"]:focus-visible { outline:3px solid rgba(34,111,220,.38); outline-offset:3px; }
 @keyframes login-card-enter { from { opacity:0; transform:translateY(9px); } to { opacity:1; transform:translateY(0); } }
+@keyframes login-logo-enter { from { opacity:0; transform:translateY(5px) scale(.98); } to { opacity:1; transform:translateY(0) scale(1); } }
 @media (max-width:767.98px) {
     .login-shell { align-items:center !important; padding:1.25rem 1rem !important; }
     .login-brand,.login-card { width:min(100%,440px); }
@@ -455,7 +456,7 @@ body.hold-transition {
     .login-form button[type="submit"] { min-height:48px; }
 }
 @media (prefers-reduced-motion: reduce) {
-    .login-card { animation:none; }
+    .login-card, .login-brand > a { animation:none; }
     .login-form input,.login-form button { transition:none; }
 }
 
@@ -492,6 +493,22 @@ body.hold-transition {
 .dev-user form { flex:0 0 auto; }
 .dev-role .btn i { transition:transform .18s ease; }
 .dev-role .btn:hover i { transform:translateX(3px); }
+.dev-role-count { min-height:96px; }
+.dev-role-count > span { color:var(--victo-muted); font-size:.78rem; font-weight:700; }
+.dev-role-count strong { margin-top:.25rem; font-size:1.45rem; }
+.dev-health-card { display:flex; align-items:center; gap:.75rem; height:100%; padding:1rem; background:var(--victo-surface); border:1px solid var(--victo-line); border-radius:12px; transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease; }
+.dev-health-card:hover { transform:translateY(-2px); border-color:#cbd6f7; box-shadow:0 10px 24px rgba(11,20,49,.07); }
+.dev-health-card--large { min-height:112px; }
+.dev-health-card strong,.dev-health-card span:not(.dev-health-indicator) { display:block; }
+.dev-health-card strong { color:var(--victo-ink); }
+.dev-health-card div > span { color:var(--victo-muted); font-size:.82rem; }
+.dev-health-indicator { flex:0 0 11px; width:11px; height:11px; border-radius:50%; }
+.dev-health-indicator.is-ok { background:#1b9b64; box-shadow:0 0 0 4px rgba(27,155,100,.12); }
+.dev-health-indicator.is-error { background:#c84242; box-shadow:0 0 0 4px rgba(200,66,66,.12); }
+.dev-activity { display:flex; flex-direction:column; gap:.2rem; padding:.9rem 1rem; border-bottom:1px solid #edf0f6; }
+.dev-activity:last-child { border-bottom:0; }
+.dev-activity > span { color:var(--victo-ink); font-size:.86rem; overflow-wrap:anywhere; }
+.dev-activity small { color:var(--victo-muted); }
 .accounts-page .account-avatar { width:38px; height:38px; }
 .accounts-page .table-responsive { border-radius:0 0 var(--victo-radius) var(--victo-radius); }
 .accounts-page td[data-label="Email"] { overflow-wrap:anywhere; }
@@ -691,3 +708,135 @@ body.dashboard-page [data-count-up] { font-variant-numeric:tabular-nums; }
 }
 
 @media (max-width: 767.98px) { .manual-grid { grid-template-columns:1fr; } .manual-nav { position:static; display:flex; overflow:auto; gap:.2rem; white-space:nowrap; } .manual-nav p { display:none; } .manual-nav a { display:inline-block; } .manual-section { grid-template-columns:42px minmax(0,1fr); padding:1.4rem 1rem; gap:.65rem; } .manual-hero { padding:1.4rem; } .manual-hero h1 { font-size:1.45rem; } .manual-hero__icon { width:48px; height:48px; font-size:1.2rem; } .manual-steps,.manual-role-cards,.manual-timeline,.manual-checks { grid-template-columns:1fr; } .manual-flow { align-items:flex-start; flex-direction:column; } .manual-flow i { transform:rotate(90deg); align-self:center; } }
+
+/* Shared, restrained interaction layer for every VictoOMS workspace. */
+.card {
+    transition:transform .22s cubic-bezier(.2,.7,.2,1), border-color .22s ease, box-shadow .22s ease;
+}
+.card:focus-within { border-color:#d4def4; box-shadow:0 16px 36px rgba(11,20,49,.09); }
+.btn {
+    transition:transform .17s ease, box-shadow .17s ease, filter .17s ease, background-color .17s ease, border-color .17s ease;
+}
+.btn:active:not(:disabled) { transform:translateY(0) scale(.985); }
+.btn:disabled, .btn[aria-disabled="true"] { cursor:not-allowed; transform:none; box-shadow:none; }
+.form-control, .form-select, .custom-file-label, .input-group-text {
+    transition:border-color .18s ease, box-shadow .18s ease, background-color .18s ease;
+}
+.form-control:focus, .form-select:focus {
+    border-color:#7f96ed;
+    box-shadow:0 0 0 .2rem rgba(52,87,213,.12) !important;
+}
+.table-hover tbody tr > * { transition:background-color .16s ease, color .16s ease; }
+.table-hover tbody tr:hover { box-shadow:inset 3px 0 0 rgba(35,89,190,.38); }
+.table-hover tbody tr a, .table-hover tbody tr .btn { transition:color .16s ease, opacity .16s ease, transform .16s ease, box-shadow .16s ease; }
+.nav-sidebar .nav-link {
+    transition:color .18s ease, background-color .18s ease, border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+}
+.nav-sidebar .nav-link .nav-icon { transition:transform .18s ease, color .18s ease; }
+.nav-sidebar .nav-link:hover { transform:translateX(2px); }
+.nav-sidebar .nav-link:hover .nav-icon { transform:translateX(2px); }
+.nav-sidebar .nav-link.active .nav-icon { color:#dce7ff; }
+.main-header .nav-link, .main-header .navbar-badge, .dropdown-item, .manual-nav a {
+    transition:color .17s ease, background-color .17s ease, opacity .17s ease, transform .17s ease;
+}
+.dropdown-menu.show { animation:victo-dropdown-in .18s cubic-bezier(.2,.7,.2,1) both; }
+@keyframes victo-dropdown-in {
+    from { opacity:0; transform:translateY(5px) scale(.99); }
+    to { opacity:1; transform:translateY(0) scale(1); }
+}
+.modal.fade .modal-dialog {
+    opacity:0;
+    transform:translateY(-8px) scale(.985);
+    transition:transform .22s cubic-bezier(.2,.7,.2,1), opacity .22s ease;
+}
+.modal.show .modal-dialog { opacity:1; transform:translateY(0) scale(1); }
+.badge { transition:background-color .18s ease, color .18s ease, box-shadow .18s ease; }
+.activity-feed-item { transition:background-color .18s ease, border-color .18s ease, transform .18s ease; }
+.activity-feed-item:hover { transform:translateX(2px); }
+.sample-photo-preview-image, .item-card img, .sample-order-page img {
+    transition:transform .22s ease, filter .22s ease, box-shadow .22s ease;
+}
+.sample-photo-preview-image:hover, .item-card img:hover, .sample-order-page img:hover { filter:saturate(1.04); }
+.sample-photo-uploader [data-photo-preview] > div { animation:victo-preview-in .2s ease-out both; }
+@keyframes victo-preview-in { from { opacity:0; transform:translateY(5px); } to { opacity:1; transform:translateY(0); } }
+#referenceDropZone, #designDropZone, #jobOrderImageDropZone, #photoDropZone {
+    transition:transform .18s ease, box-shadow .18s ease, background-color .18s ease;
+}
+#referenceDropZone:focus-visible, #designDropZone:focus-visible, #jobOrderImageDropZone:focus-visible, #photoDropZone:focus-visible {
+    outline:3px solid rgba(59,103,230,.4);
+    outline-offset:3px;
+}
+.accounts-page .account-avatar { transition:transform .2s ease, box-shadow .2s ease; }
+.accounts-page .account-avatar:hover { transform:scale(1.05); box-shadow:0 5px 12px rgba(11,20,49,.14); }
+.victo-toast { transition:opacity .24s ease, transform .24s ease; }
+.victo-toast.is-leaving { opacity:0; transform:translateY(-7px); }
+
+/* Slow decorative light movement keeps the existing login and workspace imagery. */
+.login-shell::after {
+    position:absolute;
+    z-index:-1;
+    inset:-12%;
+    content:"";
+    pointer-events:none;
+    background:radial-gradient(ellipse 32rem 25rem at 18% 22%,rgba(111,177,255,.2),transparent 72%),radial-gradient(ellipse at 78% 82%,rgba(65,103,219,.16),transparent 38%);
+    animation:login-light-drift 38s ease-in-out infinite alternate;
+}
+@keyframes login-light-drift {
+    from { transform:translate3d(-.5%,0,0) scale(1); }
+    to { transform:translate3d(.7%,.5%,0) scale(1.015); }
+}
+body.authenticated-app::before {
+    inset:-22px;
+    animation:victo-atmosphere-drift 48s ease-in-out infinite alternate;
+}
+body.authenticated-app.dashboard-page::before {
+    background-image:
+        linear-gradient(rgba(232,239,249,.86),rgba(232,239,249,.86)),
+        var(--authenticated-background-image);
+    background-size:cover, cover;
+    background-position:center, center;
+}
+@keyframes victo-atmosphere-drift {
+    from { transform:translate3d(-4px,0,0) scale(1.01); }
+    to { transform:translate3d(5px,3px,0) scale(1.01); }
+}
+body.authenticated-app .page-masthead__pulse { animation:victo-indicator-breathe 3.2s ease-in-out infinite; }
+@keyframes victo-indicator-breathe {
+    0%,100% { box-shadow:0 0 0 4px rgba(126,227,190,.12); }
+    50% { box-shadow:0 0 0 6px rgba(126,227,190,.08); }
+}
+.main-header .nav-item:has(.navbar-badge) .fa-bell { animation:victo-notification-breathe 3.4s ease-in-out infinite; transform-origin:50% 15%; }
+@keyframes victo-notification-breathe {
+    0%,88%,100% { transform:rotate(0); }
+    91% { transform:rotate(-5deg); }
+    94% { transform:rotate(5deg); }
+    97% { transform:rotate(-2deg); }
+}
+
+@media (hover:hover) and (pointer:fine) {
+    .card:hover { transform:translateY(-2px); border-color:#dce4f4; box-shadow:0 18px 42px rgba(11,20,49,.09); }
+    #referenceDropZone:hover, #designDropZone:hover, #jobOrderImageDropZone:hover, #photoDropZone:hover {
+        transform:translateY(-1px);
+        box-shadow:0 8px 22px rgba(20,60,201,.1);
+    }
+    .manual-role-cards article { transition:transform .2s ease, border-color .2s ease, box-shadow .2s ease; }
+    .manual-role-cards article:hover { transform:translateY(-2px); border-color:#d2dcf2; box-shadow:0 10px 22px rgba(11,20,49,.07); }
+}
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        scroll-behavior:auto !important;
+        animation-duration:.01ms !important;
+        animation-iteration-count:1 !important;
+        transition-duration:.01ms !important;
+    }
+    .login-brand > a, body.authenticated-app::before, .login-shell::after { animation:none !important; transform:none !important; }
+    body.dashboard-page .dashboard-reveal,
+    body.dashboard-page.dashboard-reveal-ready .dashboard-reveal { opacity:1 !important; transform:none !important; }
+}
+@media (max-width:767.98px) {
+    body.authenticated-app.dashboard-page::before {
+        background-image:
+            linear-gradient(rgba(232,239,249,.9),rgba(232,239,249,.9)),
+            var(--authenticated-background-image);
+    }
+}

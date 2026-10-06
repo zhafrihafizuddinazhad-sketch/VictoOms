@@ -13,7 +13,7 @@ class DeveloperImpersonationService
     public const TARGET_ROLE = 'developer_impersonated_role';
     public const ACTIVE = 'developer_impersonating';
 
-    public function start(User $target, string $role): void
+    public function start(User $target, string $role, ?SystemAudit $audit = null): void
     {
         $developer = Auth::user();
 
@@ -33,6 +33,7 @@ class DeveloperImpersonationService
 
         Auth::login($target);
         Session::regenerate();
+        $audit?->record('impersonation_started', "Developer started impersonating {$target->name} ({$target->email}) as ".ucfirst($role).'.', $developer);
     }
 
     public function stop(): ?User
@@ -55,6 +56,7 @@ class DeveloperImpersonationService
         Auth::login($developer);
         Session::forget([self::ORIGINAL_USER, self::TARGET_USER, self::TARGET_ROLE, self::ACTIVE]);
         Session::regenerate();
+        app(SystemAudit::class)->record('impersonation_returned', 'Developer returned from impersonation.', $developer);
 
         return $developer;
     }
