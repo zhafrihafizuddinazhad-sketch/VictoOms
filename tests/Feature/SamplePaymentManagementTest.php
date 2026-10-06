@@ -15,12 +15,12 @@ class SamplePaymentManagementTest extends TestCase
 
     private User $staff;
 
-    private function sampleOrder(string $number = 'SO-PAYMENT-0001'): SampleOrder
+    private function sampleOrder(string $number = 'SO-PAYMENT-0001', string $method = 'office'): SampleOrder
     {
         return SampleOrder::create([
             'customer_name' => 'Zhafri',
             'order_number' => $number,
-            'collection_method' => 'office',
+            'collection_method' => $method,
             'pickup_date' => '2026-09-30',
             'return_date' => '2026-10-03',
             'deposit_amount' => 50,
@@ -54,6 +54,7 @@ class SamplePaymentManagementTest extends TestCase
         $this->assertSame($this->staff->id, $payment->confirmed_by);
         $this->assertNotNull($payment->paid_at);
         $this->assertSame('paid', $order->fresh()->deposit_status);
+        $this->assertSame('ready_for_collection', $order->fresh()->status);
         $this->assertDatabaseHas('payments', [
             'id' => $payment->id,
             'sample_order_id' => $order->id,
@@ -70,6 +71,74 @@ class SamplePaymentManagementTest extends TestCase
             ->assertSee('Bank Transfer')
             ->assertSee($this->staff->name)
             ->assertSee('Transfer confirmed in bank app');
+    }
+
+    public function test_pending_payment_does_not_advance_order(): void
+    {
+        $order = $this->sampleOrder();
+
+        $this->post(route('sample-orders.payments.store', $order), [
+            'amount' => 50,
+            'payment_method' => 'cash',
+            'status' => 'pending',
+        ])->assertRedirect(route('sample-orders.show', $order));
+
+        $this->assertSame('pending_payment', $order->fresh()->status);
+        $this->assertSame('pending', $order->fresh()->deposit_status);
+    }
+
+    public function test_paid_lalamove_deposit_moves_to_existing_pre_delivery_status_and_keeps_same_photo_link(): void
+    {
+        $order = $this->sampleOrder('SO-LALAMOVE-PAID', 'lalamove');
+        $token = $order->customer_token;
+        $customerUrl = route('customer-sample-photos.show', $token);
+
+        $this->post(route('sample-orders.payments.store', $order), [
+            'amount' => 50,
+            'payment_method' => 'online',
+            'status' => 'paid',
+        ])->assertRedirect(route('sample-orders.show', $order));
+
+        $this->assertSame('paid', $order->fresh()->deposit_status);
+        $this->assertSame('pending', $order->fresh()->status);
+        $this->assertSame($token, $order->fresh()->customer_token);
+        $this->assertDatabaseCount('payments', 1);
+
+        $this->get(route('sample-orders.show', $order))
+            ->assertOk()
+            ->assertSee('Ready for Delivery')
+            ->assertSee('data-copy-url="'.e($customerUrl).'"', false)
+            ->assertSee('Copy Customer Upload Link')
+            ->assertSee('Customer Photo Upload Link')
+            ->assertSee('✓ Link Copied')
+            ->assertDontSee('Customer uploads this checkpoint');
+
+        $this->post(route('sample-photos.store', $order), [
+            'photo_type' => 'before_delivery',
+            'photos' => [\Illuminate\Http\UploadedFile::fake()->image('before-delivery.jpg')],
+        ])->assertRedirect();
+
+        $this->patch(route('sample-orders.status.update', $order), ['status' => 'in_transit'])
+            ->assertRedirect(route('sample-orders.show', $order));
+
+        $this->get($customerUrl)->assertOk()->assertSee('received the sample');
+        $this->assertSame($token, $order->fresh()->customer_token);
+    }
+
+    public function test_payment_updates_do_not_move_an_already_progressed_order_backwards(): void
+    {
+        $order = $this->sampleOrder();
+        $order->update(['status' => 'collected']);
+
+        $this->post(route('sample-orders.payments.store', $order), [
+            'amount' => 50,
+            'payment_method' => 'cash',
+            'status' => 'paid',
+        ])->assertRedirect(route('sample-orders.show', $order));
+
+        $this->assertSame('collected', $order->fresh()->status);
+        $this->assertSame('paid', $order->fresh()->deposit_status);
+        $this->assertDatabaseCount('payments', 1);
     }
 
     public function test_payment_status_updates_keep_order_deposit_status_in_sync(): void

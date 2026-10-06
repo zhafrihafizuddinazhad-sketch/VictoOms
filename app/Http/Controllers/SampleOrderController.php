@@ -195,6 +195,7 @@ class SampleOrderController extends Controller
             'events',
         ]);
         $depositSatisfied = $sampleOrder->depositIsSatisfied();
+        $sampleItemsLocked = $sampleOrder->sampleItemsAreLocked();
         $samplePhotos = $sampleOrder->photos->where('photo_type', 'original')->values();
         $photoCheckpoints = $sampleOrder->collection_method === 'office'
             ? [
@@ -202,7 +203,7 @@ class SampleOrderController extends Controller
                 ['key' => 'after_return', 'legacy' => [], 'label' => 'After Return', 'description' => 'Photograph the sample after it is returned to Victo.', 'customer' => false, 'available' => $sampleOrder->status === 'returned'],
             ]
             : [
-                ['key' => 'before_delivery', 'legacy' => ['before_handover'], 'label' => 'Before Delivery', 'description' => 'Photograph the sample before handing it to Lalamove.', 'customer' => false, 'available' => $sampleOrder->status === 'pending_payment' && $depositSatisfied],
+                ['key' => 'before_delivery', 'legacy' => ['before_handover'], 'label' => 'Before Delivery', 'description' => 'Photograph the sample before handing it to Lalamove.', 'customer' => false, 'available' => in_array($sampleOrder->status, ['pending', 'pending_payment'], true) && $depositSatisfied],
                 ['key' => 'customer_received', 'legacy' => [], 'label' => 'Customer Received', 'description' => 'The customer uploads a photo after receiving the sample.', 'customer' => true, 'available' => false],
                 ['key' => 'before_return', 'legacy' => ['before_customer_return'], 'label' => 'Before Return', 'description' => 'The customer uploads a photo before returning the sample.', 'customer' => true, 'available' => false],
                 ['key' => 'after_return', 'legacy' => [], 'label' => 'After Return', 'description' => 'Photograph the sample after it arrives back at the office.', 'customer' => false, 'available' => $sampleOrder->status === 'returned'],
@@ -216,7 +217,7 @@ class SampleOrderController extends Controller
             ? route('customer-sample-photos.show', $sampleOrder->customer_token)
             : null;
 
-        return view('sample-orders.show', compact('sampleOrder', 'samplePhotos', 'photosByCheckpoint', 'photoCheckpoints', 'customerPhotoUrl'));
+        return view('sample-orders.show', compact('sampleOrder', 'samplePhotos', 'photosByCheckpoint', 'photoCheckpoints', 'customerPhotoUrl', 'sampleItemsLocked'));
     }
 
     public function updateStatus(Request $request, SampleOrder $sampleOrder)
@@ -235,7 +236,7 @@ class SampleOrderController extends Controller
                 'ready_for_collection' => $office && $lockedOrder->status === 'pending_payment' && $depositSatisfied,
                 'collected' => $office && $lockedOrder->status === 'ready_for_collection'
                     && in_array('before_handover', $photoTypes, true),
-                'in_transit' => ! $office && $lockedOrder->status === 'pending_payment' && $depositSatisfied
+                'in_transit' => ! $office && in_array($lockedOrder->status, ['pending', 'pending_payment'], true) && $depositSatisfied
                     && (in_array('before_delivery', $photoTypes, true) || in_array('before_handover', $photoTypes, true)),
                 'return_pending' => $office && $lockedOrder->status === 'collected',
                 'completed' => $lockedOrder->status === 'returned'

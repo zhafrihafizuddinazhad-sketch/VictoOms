@@ -100,4 +100,13 @@ class SampleOrder extends Model
 
         return (float) $this->deposit_amount <= 0 || $this->deposit_status === 'paid';
     }
+
+    public function sampleItemsAreLocked(): bool
+    {
+        $lockedStatuses = $this->collection_method === 'office'
+            ? ['collected', 'return_pending', 'returned', 'completed']
+            : ['received', 'return_pending', 'returned', 'completed'];
+
+        return in_array($this->status, $lockedStatuses, true);
+    }
 }

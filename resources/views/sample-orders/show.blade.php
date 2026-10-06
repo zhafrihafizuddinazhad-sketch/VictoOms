@@ -14,7 +14,7 @@ $depositReady=$sampleOrder->depositIsSatisfied();
 $orderPhotoTypes=$sampleOrder->photos->pluck('photo_type');
 $hasHandoverPhoto=$sampleOrder->collection_method==='office'?$orderPhotoTypes->contains('before_handover'):($orderPhotoTypes->contains('before_delivery')||$orderPhotoTypes->contains('before_handover'));
 $hasAfterReturnPhoto=$orderPhotoTypes->contains('after_return');
-$statusLabel=ucwords(str_replace('_',' ',$sampleOrder->status));
+$statusLabel=$sampleOrder->collection_method==='lalamove'&&$sampleOrder->status==='pending'&&$depositReady?'Ready for Delivery':ucwords(str_replace('_',' ',$sampleOrder->status));
 $methodLabel=$sampleOrder->collection_method==='office'?'Office Pickup':'Lalamove';
 $dateLabel=$sampleOrder->collection_method==='lalamove'?'Delivery Date':'Pickup Date';
 $primaryDate=$sampleOrder->collection_method==='lalamove'?$sampleOrder->delivery_date:$sampleOrder->pickup_date;
@@ -27,7 +27,7 @@ $primaryDate=$sampleOrder->collection_method==='lalamove'?$sampleOrder->delivery
 <section class="card mb-4 border-primary" aria-labelledby="next-step-heading"><div class="card-body d-flex flex-wrap align-items-center justify-content-between gap-3">
 <div class="flex-grow-1"><div class="small text-uppercase text-primary font-weight-bold" id="next-step-heading">Next step</div>@if($sampleOrder->collection_method==='office')<div class="font-weight-bold mt-1">Office Pickup</div><p class="small text-muted mb-0">The customer collects the sample at Victo. Record each handover and return checkpoint below.</p>@else<div class="font-weight-bold mt-1">Lalamove delivery</div><p class="small text-muted mb-0">Coordinate delivery directly with the customer. VictoOMS does not book or track the driver.</p>@endif</div>
 @if($sampleOrder->status==='pending_payment'&&$sampleOrder->collection_method==='office')@if($depositReady)<form action="{{ route('sample-orders.status.update',$sampleOrder) }}" method="POST">@csrf @method('PATCH')<input type="hidden" name="status" value="ready_for_collection"><button class="btn btn-primary" type="submit">Prepare for Pickup</button></form>@else<a href="#payment-panel" class="btn btn-primary">Record Payment</a>@endif
-@elseif($sampleOrder->status==='pending_payment'&&$sampleOrder->collection_method!=='office')@if($depositReady&&$hasHandoverPhoto)<form action="{{ route('sample-orders.status.update',$sampleOrder) }}" method="POST" onsubmit="return confirm('Mark this sample as sent with Lalamove?')">@csrf @method('PATCH')<input type="hidden" name="status" value="in_transit"><button class="btn btn-primary" type="submit">Mark Sent with Lalamove</button></form>@elseif(!$depositReady)<a href="#payment-panel" class="btn btn-primary">Record Payment</a>@else<a href="#photo-evidence-heading" class="btn btn-primary">Upload Before Delivery</a>@endif
+@elseif(in_array($sampleOrder->status,['pending','pending_payment'],true)&&$sampleOrder->collection_method!=='office')@if($depositReady&&$hasHandoverPhoto)<form action="{{ route('sample-orders.status.update',$sampleOrder) }}" method="POST" onsubmit="return confirm('Mark this sample as sent with Lalamove?')">@csrf @method('PATCH')<input type="hidden" name="status" value="in_transit"><button class="btn btn-primary" type="submit">Mark Sent with Lalamove</button></form>@elseif(!$depositReady)<a href="#payment-panel" class="btn btn-primary">Record Payment</a>@else<a href="#photo-evidence-heading" class="btn btn-primary">Upload Before Delivery</a>@endif
 @elseif($sampleOrder->status==='ready_for_collection')@if($hasHandoverPhoto)<form action="{{ route('sample-orders.status.update',$sampleOrder) }}" method="POST" onsubmit="return confirm('Confirm that the customer has collected the sample?')">@csrf @method('PATCH')<input type="hidden" name="status" value="collected"><button class="btn btn-primary" type="submit">Confirm Customer Collection</button></form>@else<a href="#photo-evidence-heading" class="btn btn-primary">Upload Before Handover</a>@endif
 @elseif($sampleOrder->collection_method==='office'&&$sampleOrder->status==='collected')<form action="{{ route('sample-orders.status.update',$sampleOrder) }}" method="POST">@csrf @method('PATCH')<input type="hidden" name="status" value="return_pending"><button class="btn btn-outline-primary" type="submit">Mark Return Expected</button></form>
 @elseif($sampleOrder->status==='return_pending')<a href="#return-inspection" class="btn btn-primary">Record Return</a>
@@ -50,7 +50,11 @@ $primaryDate=$sampleOrder->collection_method==='lalamove'?$sampleOrder->delivery
 
         <div class="card-header d-flex justify-content-between align-items-center">
             <strong>Sample Items</strong>
-            <a href="{{ route('sample-items.create', $sampleOrder) }}" class="btn btn-sm btn-primary">+ Add Sample Item</a>
+            @if($sampleItemsLocked)
+                <span class="badge bg-secondary">🔒 Locked after customer handover</span>
+            @else
+                <a href="{{ route('sample-items.create', $sampleOrder) }}" class="btn btn-sm btn-primary">+ Add Sample Item</a>
+            @endif
         </div>
 
         <div class="card-body">
@@ -65,7 +69,9 @@ $primaryDate=$sampleOrder->collection_method==='lalamove'?$sampleOrder->delivery
                                 @if($item->sample?->sample_code)<div class="col-sm-6"><span class="text-muted">Physical sample</span><div>{{ $item->sample->sample_code }}</div></div>@endif
                                 @if($item->description)<div class="col-12"><span class="text-muted">Description</span><div class="text-break">{{ $item->description }}</div></div>@endif
                             </div>
-                            <div class="d-flex flex-wrap gap-2 mt-3"><a href="{{ route('sample-items.edit', $item) }}" class="btn btn-sm btn-outline-primary">Edit</a><form action="{{ route('sample-items.destroy', $item) }}" method="POST" onsubmit="return confirm('Are you sure you want to remove this sample item? This action cannot be undone.')">@csrf @method('DELETE')<button type="submit" class="btn btn-sm btn-outline-danger">Remove</button></form></div>
+                            @unless($sampleItemsLocked)
+                                <div class="d-flex flex-wrap gap-2 mt-3"><a href="{{ route('sample-items.edit', $item) }}" class="btn btn-sm btn-outline-primary">Edit</a><form action="{{ route('sample-items.destroy', $item) }}" method="POST" onsubmit="return confirm('Are you sure you want to remove this sample item? This action cannot be undone.')">@csrf @method('DELETE')<button type="submit" class="btn btn-sm btn-outline-danger">Remove</button></form></div>
+                            @endunless
                         </article></div>
                     @endforeach
                 </div>
@@ -75,7 +81,11 @@ $primaryDate=$sampleOrder->collection_method==='lalamove'?$sampleOrder->delivery
                 <div class="text-center py-4">
                     <p class="fw-semibold mb-1">No sample items added yet.</p>
                     <p class="text-muted mb-3">Add the first sample item to this order.</p>
-                    <a href="{{ route('sample-items.create', $sampleOrder) }}" class="btn btn-primary">+ Add Sample Item</a>
+                    @unless($sampleItemsLocked)
+                        <a href="{{ route('sample-items.create', $sampleOrder) }}" class="btn btn-primary">+ Add Sample Item</a>
+                    @else
+                        <span class="badge bg-secondary">🔒 Locked after customer handover</span>
+                    @endunless
                 </div>
 
             @endif
@@ -261,7 +271,12 @@ $primaryDate=$sampleOrder->collection_method==='lalamove'?$sampleOrder->delivery
                             @endif
 
                             @if($checkpoint['customer'])
-                                <a href="{{ $customerPhotoUrl }}" class="btn btn-sm btn-outline-primary" target="_blank" rel="noopener">Customer uploads this checkpoint</a>
+                                <button type="button" class="btn btn-outline-primary customer-upload-link-copy" data-copy-url="{{ $customerPhotoUrl }}" aria-live="polite">Copy Customer Upload Link</button>
+                                <div class="customer-upload-link-fallback mt-2" hidden>
+                                    <label class="small text-muted" for="customer-upload-link-{{ $key }}">Copy this link manually</label>
+                                    <input id="customer-upload-link-{{ $key }}" class="form-control" type="text" value="{{ $customerPhotoUrl }}" readonly onclick="this.select()">
+                                    <div class="small text-danger mt-1">Automatic copy was unavailable. Select and copy the link above.</div>
+                                </div>
                             @elseif(! $checkpoint['available'])
                                 <p class="small text-muted mb-0">
                                     @if($key === 'before_handover') Available after the deposit is ready and the order is prepared for pickup.
@@ -343,5 +358,45 @@ $primaryDate=$sampleOrder->collection_method==='lalamove'?$sampleOrder->delivery
     </div>
 
 </div>
+
+<script>
+document.querySelectorAll('.customer-upload-link-copy').forEach(button => {
+    button.addEventListener('click', async () => {
+        const url = button.dataset.copyUrl;
+        let copied = false;
+
+        try {
+            if (navigator.clipboard && window.isSecureContext) {
+                await navigator.clipboard.writeText(url);
+                copied = true;
+            }
+        } catch (error) {
+            // Fall back when clipboard permissions are unavailable.
+        }
+
+        if (!copied) {
+            const temporaryInput = document.createElement('textarea');
+            temporaryInput.value = url;
+            temporaryInput.setAttribute('readonly', '');
+            temporaryInput.style.position = 'fixed';
+            temporaryInput.style.opacity = '0';
+            document.body.appendChild(temporaryInput);
+            temporaryInput.select();
+            try { copied = document.execCommand('copy'); } catch (error) { copied = false; }
+            temporaryInput.remove();
+        }
+
+        if (copied) {
+            button.textContent = '✓ Link Copied';
+            window.setTimeout(() => { button.textContent = 'Copy Customer Upload Link'; }, 2200);
+        } else {
+            const fallback = button.closest('.card-body').querySelector('.customer-upload-link-fallback');
+            fallback.hidden = false;
+            fallback.querySelector('input').focus();
+            fallback.querySelector('input').select();
+        }
+    });
+});
+</script>
 
 @endsection

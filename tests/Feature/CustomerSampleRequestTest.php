@@ -280,7 +280,7 @@ class CustomerSampleRequestTest extends TestCase
         $this->post(route('sample-orders.payments.store', $order), [
             'amount' => 25, 'payment_method' => 'cash', 'status' => 'paid',
         ])->assertRedirect(route('sample-orders.show', $order));
-        $this->assertSame('pending_payment', $order->fresh()->status);
+        $this->assertSame('pending', $order->fresh()->status);
         $this->patch(route('sample-orders.status.update', $order), ['status' => 'in_transit'])
             ->assertSessionHasErrors('status');
         $this->post(route('sample-photos.store', $order), [

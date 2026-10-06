@@ -90,14 +90,19 @@ class PaymentController extends Controller
             $sampleOrder->update(['deposit_status' => $depositStatus]);
         }
 
-        if ($depositStatus === 'paid'
-            && $sampleOrder->collection_method === 'office'
-            && $sampleOrder->status === 'pending_payment') {
-            $sampleOrder->update(['status' => 'ready_for_collection']);
-            $sampleOrder->events()->create([
-                'event_key' => 'prepared_for_pickup',
-                'user_id' => auth()->id(),
-            ]);
+        if ($depositStatus === 'paid' && $sampleOrder->status === 'pending_payment') {
+            $nextStatus = $sampleOrder->collection_method === 'office'
+                ? 'ready_for_collection'
+                : 'pending';
+
+            $sampleOrder->update(['status' => $nextStatus]);
+
+            if ($nextStatus === 'ready_for_collection') {
+                $sampleOrder->events()->create([
+                    'event_key' => 'prepared_for_pickup',
+                    'user_id' => auth()->id(),
+                ]);
+            }
         }
     }
 }

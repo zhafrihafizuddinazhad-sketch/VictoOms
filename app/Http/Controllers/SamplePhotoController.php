@@ -29,7 +29,7 @@ class SamplePhotoController extends Controller
         $depositSatisfied = $sampleOrder->depositIsSatisfied();
         $checkpointReady = match ($checkpoint) {
             'before_handover' => $sampleOrder->status === 'ready_for_collection' && $depositSatisfied,
-            'before_delivery' => $sampleOrder->status === 'pending_payment' && $depositSatisfied,
+            'before_delivery' => in_array($sampleOrder->status, ['pending', 'pending_payment'], true) && $depositSatisfied,
             'after_return' => $sampleOrder->status === 'returned' && $sampleOrder->sampleReturn()->exists(),
             default => false,
         };

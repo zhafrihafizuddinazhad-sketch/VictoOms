@@ -101,7 +101,7 @@
 
                                     <td>
                                         <span class="badge {{ $order->status === 'completed' ? 'bg-success' : (in_array($order->status, ['cancelled'], true) ? 'bg-danger' : (in_array($order->status, ['pending','pending_payment'], true) ? 'bg-warning text-dark' : 'bg-primary')) }}">
-                                            {{ ucwords(str_replace('_', ' ', $order->status)) }}
+                                            {{ $order->collection_method === 'lalamove' && $order->status === 'pending' && $order->deposit_status === 'paid' ? 'Ready for Delivery' : ucwords(str_replace('_', ' ', $order->status)) }}
                                         </span>
                                     </td>
 
