@@ -10,7 +10,7 @@
     @if($errors->any())
         <div class="alert alert-danger rounded-lg" role="alert"><strong>Please check your request.</strong><ul class="mb-0 mt-2">@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div>
     @endif
-    <form id="sample-request-form" method="POST" action="{{ route('customer.sample-request.store') }}">
+    <form id="sample-request-form" method="POST" action="{{ route('customer.sample-request.store') }}" data-loading="off">
         @csrf
         <div id="request-fields">
             @include('sample-orders.partials.request-fields')
@@ -36,7 +36,10 @@
     const displayDate = value => value ? new Date(value + 'T00:00:00').toLocaleDateString('en-MY',{day:'2-digit',month:'short',year:'numeric'}) : '—';
     const line = (label, value) => `<div class="review-line"><span class="text-muted">${label}</span><span class="review-value">${escapeHtml(value)}</span></div>`;
     form.addEventListener('submit', event => {
-        if (reviewing) return;
+        if (reviewing) {
+            delete form.dataset.loading;
+            return;
+        }
         event.preventDefault(); if (!form.reportValidity()) return;
         const method = val('collection_method');
         const parts = [line('Full name',val('full_name')),line('Phone',val('phone')),line('Company',val('company')),line('Email',val('email')),line('Collection',method === 'office' ? 'Office pickup' : 'Lalamove delivery')];

@@ -45,6 +45,10 @@ class CustomerSampleRequestTest extends TestCase
     {
         $this->get(route('customer.sample-request.create'))
             ->assertOk()
+            ->assertSee('id="sample-request-form" method="POST"', false)
+            ->assertSee('data-loading="off"', false)
+            ->assertSee('id="confirm-submit"', false)
+            ->assertSee('type="submit" id="confirm-submit"', false)
             ->assertSee('Request a sample')
             ->assertSee('Add another sample')
             ->assertSee('Lalamove delivery');
