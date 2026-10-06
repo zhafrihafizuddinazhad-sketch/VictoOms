@@ -96,7 +96,7 @@
                                     </td>
 
                                     <td>
-                                        RM {{ number_format($order->deposit_amount, 2) }}<div class="small text-warning-emphasis">{{ ucfirst($order->deposit_status ?? 'pending') }}</div>
+                                        RM {{ number_format((float) ($order->paid_deposit_amount ?? 0), 2) }}<div class="small text-warning-emphasis">{{ ucfirst($order->deposit_status ?? 'pending') }}</div>
                                     </td>
 
                                     <td>

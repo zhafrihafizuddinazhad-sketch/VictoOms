@@ -4,7 +4,7 @@
 
 @section('content')
 
-<div class="container-fluid">
+<div class="container-fluid accounts-page">
 
     {{-- Page Header --}}
     <div class="d-flex justify-content-between align-items-center mb-3">
@@ -24,38 +24,6 @@
             Add Account
         </a>
     </div>
-
-
-    {{-- Success Message --}}
-    @if(session('success'))
-        <div class="alert alert-success alert-dismissible fade show">
-            <i class="fas fa-check-circle"></i>
-            {{ session('success') }}
-
-            <button type="button"
-                    class="close"
-                    data-dismiss="alert"
-                    aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-            </button>
-        </div>
-    @endif
-
-
-    {{-- Error Message --}}
-    @if(session('error'))
-        <div class="alert alert-danger alert-dismissible fade show">
-            <i class="fas fa-exclamation-circle"></i>
-            {{ session('error') }}
-
-            <button type="button"
-                    class="close"
-                    data-dismiss="alert"
-                    aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-            </button>
-        </div>
-    @endif
 
 
     {{-- Status Filter --}}
@@ -120,13 +88,13 @@
                             <tr>
 
                                 {{-- Number --}}
-                                <td>
+                                <td data-label="#">
                                     {{ $index + 1 }}
                                 </td>
 
 
                                 {{-- Name --}}
-                                <td>
+                                <td data-label="Name">
                                     <div class="d-flex align-items-center">
 
                                         <div
@@ -145,19 +113,19 @@
 
 
                                 {{-- Email --}}
-                                <td>
+                                <td data-label="Email">
                                     {{ $staff->email }}
                                 </td>
 
 
                                 {{-- Phone --}}
-                                <td>
+                                <td data-label="Phone">
                                     {{ $staff->phone ?? '-' }}
                                 </td>
 
 
                                 {{-- Role --}}
-                                <td>
+                                <td data-label="Role">
 
                                     @foreach($staff->getRoleNames() as $role)
 
@@ -181,7 +149,7 @@
 
 
                                 {{-- Status --}}
-                                <td>
+                                <td data-label="Status">
 
                                     @if($staff->account_status === 'active')
 
@@ -216,13 +184,13 @@
 
 
                                 {{-- Member Since --}}
-                                <td>
+                                <td data-label="Member Since">
                                     {{ $staff->created_at?->format('d M Y') ?? '-' }}
                                 </td>
 
 
                                 {{-- Actions --}}
-                                <td>
+                                <td data-label="Action">
 
                                     @if($staff->id === auth()->id())
 

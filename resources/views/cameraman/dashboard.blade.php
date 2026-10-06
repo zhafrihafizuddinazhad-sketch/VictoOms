@@ -33,7 +33,7 @@
 
                     <div class="inner">
 
-                        <h3>{{ $ready }}</h3>
+                        <h3 data-count-up="{{ $ready }}">{{ $ready }}</h3>
 
                         <p>Ready for Photo</p>
 
@@ -55,7 +55,7 @@
 
                     <div class="inner">
 
-                        <h3>{{ $inProgress }}</h3>
+                        <h3 data-count-up="{{ $inProgress }}">{{ $inProgress }}</h3>
 
                         <p>Photo Session</p>
 
@@ -77,7 +77,7 @@
 
                     <div class="inner">
 
-                        <h3>{{ $completedToday }}</h3>
+                        <h3 data-count-up="{{ $completedToday }}">{{ $completedToday }}</h3>
 
                         <p>Completed Today</p>
 
@@ -99,7 +99,7 @@
 
                     <div class="inner">
 
-                        <h3>{{ $totalCompleted }}</h3>
+                        <h3 data-count-up="{{ $totalCompleted }}">{{ $totalCompleted }}</h3>
 
                         <p>Total Completed</p>
 
@@ -127,6 +127,7 @@
 
             <div class="card-body">
 
+                <div class="table-responsive">
                 <table class="table table-bordered table-hover">
 
                     <thead>
@@ -212,6 +213,7 @@
                     </tbody>
 
                 </table>
+                </div>
 
             </div>
 

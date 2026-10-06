@@ -58,7 +58,7 @@
 
                     <div class="inner">
 
-                        <h3>
+                        <h3 data-count-up="{{ $currentTasks }}">
 
                             {{ $currentTasks }}
 
@@ -91,7 +91,7 @@
 
                     <div class="inner">
 
-                        <h3>
+                        <h3 data-count-up="{{ $pendingApproval }}">
 
                             {{ $pendingApproval }}
 
@@ -124,7 +124,7 @@
 
                     <div class="inner">
 
-                        <h3>
+                        <h3 data-count-up="{{ $completedTasks }}">
 
                             {{ $completedTasks }}
 
@@ -157,7 +157,7 @@
 
                     <div class="inner">
 
-                        <h3>
+                        <h3 data-count-up="{{ $overdueTasks }}">
 
                             {{ $overdueTasks }}
 

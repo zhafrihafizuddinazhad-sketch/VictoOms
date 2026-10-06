@@ -132,7 +132,11 @@ class SampleOrderController extends Controller
 
     public function index()
     {
-        $query = SampleOrder::query()->with('customer');
+        $query = SampleOrder::query()
+            ->with('customer')
+            ->withSum([
+                'payments as paid_deposit_amount' => fn ($payments) => $payments->where('status', 'paid'),
+            ], 'amount');
 
         if (request()->filled('search')) {
             $search = request('search');

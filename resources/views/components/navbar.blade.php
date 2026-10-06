@@ -1,5 +1,9 @@
 <nav class="main-header navbar navbar-expand navbar-white navbar-light">
 
+    <button type="button" class="nav-link sidebar-toggle" data-widget="pushmenu" aria-label="Toggle navigation menu" aria-controls="main-sidebar">
+        <i class="fas fa-bars" aria-hidden="true"></i>
+    </button>
+
     <a href="{{ auth()->user()->hasRole('developer') ? route('developer.dashboard') : (auth()->user()->hasRole('owner') ? route('owner.dashboard') : (auth()->user()->hasRole('admin') ? route('admin.dashboard') : (auth()->user()->hasRole('designer') ? route('designer.dashboard') : route('cameraman.dashboard')))) }}" class="top-brand" aria-label="Victo OMS home">
         <img src="{{ asset('images/victo-logo.png') }}?v=20260917" alt="Victo OMS" class="top-brand__logo">
     </a>

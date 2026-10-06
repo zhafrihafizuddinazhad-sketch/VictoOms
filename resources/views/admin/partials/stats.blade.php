@@ -11,7 +11,7 @@
 
             <div class="inner">
 
-                <h3>
+                <h3 data-count-up="{{ $stats['todayOrders'] }}">
                     {{ $stats['todayOrders'] }}
                 </h3>
 
@@ -39,7 +39,7 @@
 
             <div class="inner">
 
-                <h3>
+                <h3 data-count-up="{{ $stats['activeOrders'] }}">
                     {{ $stats['activeOrders'] }}
                 </h3>
 
@@ -67,7 +67,7 @@
 
             <div class="inner">
 
-                <h3>
+                <h3 data-count-up="{{ $stats['dueSoon'] }}">
                     {{ $stats['dueSoon'] }}
                 </h3>
 
@@ -95,7 +95,7 @@
 
             <div class="inner">
 
-                <h3>
+                <h3 data-count-up="{{ $stats['needsAttention'] }}">
                     {{ $stats['needsAttention'] }}
                 </h3>
 

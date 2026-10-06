@@ -13,13 +13,16 @@
 
     <title>Victo OMS</title>
 
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-
     <link rel="stylesheet" href="{{ asset('vendor/fontawesome-free/css/all.min.css') }}">
     <link rel="stylesheet" href="{{ asset('vendor/adminlte/dist/css/adminlte.min.css') }}">
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
-<body class="hold-transition sidebar-mini">
+@php
+    $isDashboard = request()->routeIs('owner.dashboard', 'admin.dashboard', 'designer.dashboard', 'cameraman.dashboard', 'developer.dashboard');
+@endphp
+
+<body class="hold-transition sidebar-mini layout-fixed authenticated-app {{ $isDashboard ? 'dashboard-page' : '' }}" style="--authenticated-background-image: url('{{ asset('images/authenticated-background.jpeg') }}')">
 
 <div class="wrapper">
 
@@ -53,7 +56,7 @@
 
             @if(session('success'))
 
-    <div class="alert alert-success alert-dismissible fade show">
+    <div class="victo-toast victo-toast--success alert alert-success alert-dismissible fade show" role="status" aria-live="polite">
 
         <i class="fas fa-check-circle mr-1"></i>
 
@@ -76,7 +79,7 @@
 
 @if(session('error'))
 
-    <div class="alert alert-danger alert-dismissible fade show">
+    <div class="victo-toast victo-toast--error alert alert-danger alert-dismissible fade show" role="alert" aria-live="assertive">
 
         <i class="fas fa-exclamation-triangle mr-1"></i>
 

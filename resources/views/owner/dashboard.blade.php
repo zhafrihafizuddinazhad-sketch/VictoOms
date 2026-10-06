@@ -12,7 +12,7 @@
     <div class="col-md-4">
         <div class="small-box bg-info">
             <div class="inner">
-                <h3>{{ $totalCustomers }}</h3>
+                <h3 data-count-up="{{ $totalCustomers }}">{{ $totalCustomers }}</h3>
                 <p>Customers</p>
             </div>
             <div class="icon">
@@ -24,7 +24,7 @@
     <div class="col-md-4">
         <div class="small-box bg-success">
             <div class="inner">
-                <h3>{{ $totalOrders }}</h3>
+                <h3 data-count-up="{{ $totalOrders }}">{{ $totalOrders }}</h3>
                 <p>Total Orders</p>
             </div>
             <div class="icon">
@@ -36,7 +36,7 @@
     <div class="col-md-4">
         <div class="small-box bg-warning">
             <div class="inner">
-                <h3>{{ $completed }}</h3>
+                <h3 data-count-up="{{ $completed }}">{{ $completed }}</h3>
                 <p>Completed Orders</p>
             </div>
             <div class="icon">
@@ -552,6 +552,7 @@
 
             <div class="card-body p-0">
 
+                <div class="table-responsive">
                 <table class="table table-hover mb-0">
 
                     <thead>
@@ -609,6 +610,7 @@
                     </tbody>
 
                 </table>
+                </div>
 
             </div>
 
@@ -721,7 +723,7 @@
 
         @forelse($activities as $activity)
 
-            <div class="d-flex justify-content-between">
+            <div class="d-flex justify-content-between activity-feed-item">
 
                 <div>
 
