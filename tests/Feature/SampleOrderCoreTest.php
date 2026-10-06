@@ -120,6 +120,9 @@ class SampleOrderCoreTest extends TestCase
             ->assertSee('Delivery address')
             ->assertSee('Pickup date')
             ->assertSee('Deposit amount')
+            ->assertSee('Take Photo')
+            ->assertSee('Choose from Gallery')
+            ->assertSee("setAttribute('capture', 'environment')", false)
             ->assertSee('SAMPLE MANAGEMENT')
             ->assertSee('Sample Orders');
     }

@@ -123,6 +123,25 @@ body.hold-transition {
 }
 .nav-sidebar .nav-icon { margin-right: .45rem !important; font-size: .95rem !important; }
 
+.sample-photo-actions { gap: .5rem; }
+.sample-photo-actions .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    margin-bottom: 0;
+}
+.sample-photo-preview-image {
+    display: block;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+}
+
+@media (max-width: 575.98px) {
+    .sample-photo-actions .btn:not(.btn-link) { width: 100%; }
+}
+
 .content-wrapper {
     min-height: calc(100vh - 70px) !important;
     background:

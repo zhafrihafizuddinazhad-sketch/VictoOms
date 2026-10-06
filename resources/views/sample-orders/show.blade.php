@@ -270,12 +270,20 @@ $primaryDate=$sampleOrder->collection_method==='lalamove'?$sampleOrder->delivery
                                     @endif
                                 </p>
                             @else
-                                <form action="{{ route('sample-photos.store', $sampleOrder) }}" method="POST" enctype="multipart/form-data" class="row g-2 align-items-end">
+                                <form action="{{ route('sample-photos.store', $sampleOrder) }}" method="POST" enctype="multipart/form-data" class="row g-2 align-items-end sample-checkpoint-upload">
                                     @csrf
                                     <input type="hidden" name="photo_type" value="{{ $key }}">
-                                    <div class="col-md-5"><label for="photos-{{ $key }}" class="form-label">Upload photos</label><input type="file" name="photos[]" id="photos-{{ $key }}" class="form-control" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" multiple required></div>
-                                    <div class="col-md-5"><label for="notes-{{ $key }}" class="form-label">Caption <span class="text-muted">(optional)</span></label><input type="text" name="notes" id="notes-{{ $key }}" class="form-control" maxlength="1000" placeholder="Add a note for these photos"></div>
-                                    <div class="col-md-2"><button type="submit" class="btn btn-outline-primary w-100">Upload Photos</button></div>
+                                    <div class="col-12 col-md-5">
+                                        @include('sample-orders.partials.photo-upload', [
+                                            'photoUploadId' => 'checkpoint-photos-'.$key,
+                                            'photoUploadName' => 'photos',
+                                            'photoUploadLimit' => 10,
+                                            'photoUploadRequired' => true,
+                                            'photoUploadHelp' => 'JPG, PNG, or WebP · up to 10 photos · 5 MB each.',
+                                        ])
+                                    </div>
+                                    <div class="col-12 col-md-5"><label for="notes-{{ $key }}" class="form-label">Caption <span class="text-muted">(optional)</span></label><input type="text" name="notes" id="notes-{{ $key }}" class="form-control" maxlength="1000" placeholder="Add a note for these photos"></div>
+                                    <div class="col-12 col-md-2"><button type="submit" class="btn btn-outline-primary w-100">Upload Photos</button></div>
                                 </form>
                             @endif
                         </div>

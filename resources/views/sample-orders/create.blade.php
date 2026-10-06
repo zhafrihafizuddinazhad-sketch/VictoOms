@@ -18,18 +18,19 @@
                 <div class="card-body">
                     <div class="mb-4"><label for="deposit_amount" class="form-label">Deposit amount (RM) <span class="text-danger">*</span></label><input type="number" step="0.01" min="0" class="form-control @error('deposit_amount') is-invalid @enderror" id="deposit_amount" name="deposit_amount" value="{{ old('deposit_amount') }}" placeholder="0.00" required>@error('deposit_amount')<div class="invalid-feedback">{{ $message }}</div>@enderror<div class="form-text">The order remains unpaid until a payment is recorded.</div></div>
                     <p class="small text-muted">Original photos are separate from handover, delivery, and return evidence.</p>
-                    <label for="sample-photos" class="form-label">Original sample photos <span class="text-muted">(optional, up to 10)</span></label>
-                    <input type="file" id="sample-photos" name="sample_photos[]" class="form-control @error('sample_photos.*') is-invalid @enderror" accept="image/*" capture="environment" multiple>
-                    <div class="form-text">JPG, PNG, or WebP · 5 MB maximum per photo.</div>
+                    <p class="form-label mb-2">Original sample photos <span class="text-muted">(optional, up to 10)</span></p>
+                    @include('sample-orders.partials.photo-upload', [
+                        'photoUploadId' => 'original-sample-photos',
+                        'photoUploadName' => 'sample_photos',
+                        'photoUploadLimit' => 10,
+                        'photoUploadRequired' => false,
+                        'photoUploadHelp' => 'JPG, PNG, or WebP · 5 MB maximum per photo.',
+                    ])
                     @error('sample_photos.*')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
-                    <div id="sample-photo-preview" class="row g-2 mt-2" aria-live="polite"></div>
                 </div>
             </section>
             <div class="d-flex flex-column flex-sm-row justify-content-end gap-2 mb-4"><a href="{{ route('sample-orders.index') }}" class="btn btn-outline-secondary">Cancel</a><button type="submit" class="btn btn-primary btn-lg px-4">Create Sample Order</button></div>
         </div>
     </form>
 </div>
-<script>
-(() => { const input=document.getElementById('sample-photos'); const preview=document.getElementById('sample-photo-preview'); if(!input||!preview)return; input.addEventListener('change',()=>{ preview.replaceChildren(); [...input.files].slice(0,10).forEach(file=>{ if(!file.type.startsWith('image/'))return; const column=document.createElement('div'); column.className='col-4 col-sm-3 col-md-2'; const image=document.createElement('img'); image.src=URL.createObjectURL(file); image.alt=file.name; image.className='img-fluid rounded'; image.style.aspectRatio='1'; image.style.objectFit='cover'; column.append(image); preview.append(column); }); }); })();
-</script>
 @endsection

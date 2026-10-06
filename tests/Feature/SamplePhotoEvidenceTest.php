@@ -45,6 +45,11 @@ class SamplePhotoEvidenceTest extends TestCase
         $order = $this->sampleOrder();
         $order->update(['deposit_status' => 'paid']);
         $this->patch(route('sample-orders.status.update', $order), ['status' => 'ready_for_collection']);
+        $this->get(route('sample-orders.show', $order))
+            ->assertOk()
+            ->assertSee('Take Photo')
+            ->assertSee('Choose from Gallery')
+            ->assertSee("setAttribute('capture', 'environment')", false);
         $this->post(route('sample-photos.store', $order), [
             'photo_type' => 'before_handover',
             'notes' => 'Condition evidence',
@@ -91,7 +96,10 @@ class SamplePhotoEvidenceTest extends TestCase
         auth()->logout();
         $this->get(route('customer-sample-photos.show', $order->customer_token))
             ->assertOk()->assertSee('Please upload a photo showing that you have received the sample.')
-            ->assertSee('name="photo_type" value="customer_received"', false);
+            ->assertSee('name="photo_type" value="customer_received"', false)
+            ->assertSee('Take Photo')
+            ->assertSee('Choose from Gallery')
+            ->assertSee("setAttribute('capture', 'environment')", false);
         $this->post(route('customer-sample-photos.store', $order->customer_token), [
             'photo_type' => 'before_delivery', 'photos' => [UploadedFile::fake()->image('forbidden.jpg')],
         ])->assertSessionHasErrors('photo_type');

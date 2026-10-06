@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Carbon;
 
 class SampleOrder extends Model
 {
@@ -23,6 +24,7 @@ class SampleOrder extends Model
     'deposit_amount',
     'deposit_status',
     'status',
+    'completed_at',
     'customer_token',
     'notes',
     'customer_id',
@@ -33,8 +35,26 @@ class SampleOrder extends Model
         'pickup_date' => 'date',
         'delivery_date' => 'date',
         'return_date' => 'date',
+        'completed_at' => 'datetime',
         'deposit_amount' => 'decimal:2',
     ];
+
+    protected static function booted(): void
+    {
+        static::saving(function (SampleOrder $sampleOrder): void {
+            $isTransitionToCompleted = $sampleOrder->exists
+                && $sampleOrder->isDirty('status')
+                && $sampleOrder->status === 'completed'
+                && $sampleOrder->getOriginal('status') !== 'completed';
+            $isNewCompletedOrderWithoutTimestamp = ! $sampleOrder->exists
+                && $sampleOrder->status === 'completed'
+                && ! $sampleOrder->completed_at;
+
+            if ($isTransitionToCompleted || $isNewCompletedOrderWithoutTimestamp) {
+                $sampleOrder->completed_at = Carbon::now();
+            }
+        });
+    }
 
     /*
     |--------------------------------------------------------------------------
