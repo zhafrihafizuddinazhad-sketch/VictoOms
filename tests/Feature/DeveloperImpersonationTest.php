@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\ActivityLog;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -51,6 +52,41 @@ class DeveloperImpersonationTest extends TestCase
 
         $this->assertAuthenticatedAs($developer);
         $this->assertTrue(auth()->user()->hasRole('developer'));
+    }
+
+    public function test_impersonation_audit_is_hidden_from_owner_dashboard_but_kept_for_developer(): void
+    {
+        $developer = User::factory()->create(['account_status' => 'active']);
+        $developer->assignRole('developer');
+
+        $owner = User::factory()->create(['account_status' => 'active']);
+        $owner->assignRole('owner');
+
+        ActivityLog::create([
+            'user_id' => $owner->id,
+            'action' => 'Customer created',
+            'description' => 'Business activity remains visible.',
+        ]);
+
+        $this->actingAs($developer)
+            ->post(route('developer.impersonate', $owner), ['role' => 'owner'])
+            ->assertRedirect(route('owner.dashboard', absolute: false));
+
+        $this->get(route('owner.dashboard'))
+            ->assertOk()
+            ->assertSee('Customer created')
+            ->assertDontSee('impersonation_started');
+
+        $this->post(route('developer.impersonation.stop'))
+            ->assertRedirect(route('developer.dashboard', absolute: false));
+
+        $this->get(route('developer.activity'))
+            ->assertOk()
+            ->assertSee('Impersonation Started')
+            ->assertSee('Impersonation Returned');
+
+        $this->assertDatabaseHas('activity_logs', ['action' => 'impersonation_started']);
+        $this->assertDatabaseHas('activity_logs', ['action' => 'impersonation_returned']);
     }
 
     public function test_non_developers_cannot_access_developer_routes(): void

@@ -116,6 +116,7 @@ class DashboardController extends Controller
             'order.customer',
             'user',
         ])
+        ->whereNotIn('action', ['impersonation_started', 'impersonation_returned'])
         ->latest()
         ->take(5)
         ->get();
