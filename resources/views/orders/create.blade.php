@@ -2,7 +2,7 @@
 
 @section('content')
 
-<div class="card">
+<div class="card order-form-card">
 
     <div class="card-header">
 

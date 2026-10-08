@@ -686,7 +686,9 @@ body.authenticated-app::before {
     background-repeat:no-repeat;
     filter:blur(2.5px);
 }
-body.authenticated-app > .wrapper { position:relative; z-index:1; }
+body.authenticated-app > .wrapper { position:relative; z-index:auto; }
+/* Keep Bootstrap modals in order forms out of the card hover stacking context. */
+.order-form-card:hover { transform:none; }
 body.authenticated-app .content-wrapper { background:linear-gradient(110deg,rgba(255,255,255,.36),rgba(243,246,252,.28)); }
 
 /* Dashboard reveals trigger once per element as it enters view. */
