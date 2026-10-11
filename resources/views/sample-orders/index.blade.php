@@ -1,4 +1,4 @@
-@extends('layouts.admin')
+@extends('layouts.app')
 
 @section('content')
 <div class="container-fluid">
@@ -21,7 +21,7 @@
     @endif
 
     <div class="row g-3 mb-4">
-        @foreach(['total' => 'Total orders', 'pending_payment' => 'Pending payment', 'upcoming_returns' => 'Returns in 7 days', 'overdue_returns' => 'Overdue returns', 'office' => 'Office orders', 'lalamove' => 'Lalamove orders', 'active' => 'Active orders', 'completed' => 'Completed'] as $key => $label)
+        @foreach(['total' => 'Total orders', 'pending_payment' => 'Pending payment', 'currently_out' => 'Currently out', 'completed' => 'Completed'] as $key => $label)
             <div class="col-6 col-xl-3">
                 <div class="card h-100"><div class="card-body">
                     <div class="small text-muted">{{ $label }}</div>
@@ -39,12 +39,11 @@
         <div class="card-body">
 
             <form method="GET" action="{{ route('sample-orders.index') }}" class="row g-2 align-items-end mb-4">
-                <div class="col-md-3"><label class="form-label" for="filter-search">Search</label><input id="filter-search" name="search" value="{{ request('search') }}" class="form-control" placeholder="Order number or customer"></div>
+                <div class="col-md-3"><label class="form-label" for="filter-customer">Customer</label><input id="filter-customer" name="customer" value="{{ request('customer') }}" class="form-control" placeholder="Search name"></div>
                 <div class="col-md-2"><label class="form-label" for="filter-status">Status</label><select id="filter-status" name="status" class="form-select"><option value="">All statuses</option>@foreach(['pending','pending_payment','ready_for_collection','collected','in_transit','received','return_pending','returned','completed','cancelled'] as $status)<option value="{{ $status }}" @selected(request('status') === $status)>{{ ucwords(str_replace('_', ' ', $status)) }}</option>@endforeach</select></div>
                 <div class="col-md-2"><label class="form-label" for="filter-collection">Collection</label><select id="filter-collection" name="collection_method" class="form-select"><option value="">All methods</option><option value="office" @selected(request('collection_method') === 'office')>Office pickup</option><option value="lalamove" @selected(request('collection_method') === 'lalamove')>Lalamove</option></select></div>
                 <div class="col-md-2"><label class="form-label" for="filter-pickup">Pickup date</label><input id="filter-pickup" type="date" name="pickup_date" value="{{ request('pickup_date') }}" class="form-control"></div>
                 <div class="col-md-2"><label class="form-label" for="filter-return">Return date</label><input id="filter-return" type="date" name="return_date" value="{{ request('return_date') }}" class="form-control"></div>
-                <div class="col-md-2"><label class="form-label" for="filter-due">Return timing</label><select id="filter-due" name="return_due" class="form-select"><option value="">Any</option><option value="upcoming" @selected(request('return_due') === 'upcoming')>Due in 7 days</option><option value="overdue" @selected(request('return_due') === 'overdue')>Overdue</option></select></div>
                 <div class="col-md-1 d-flex gap-2"><button class="btn btn-primary" type="submit">Filter</button></div>
                 <div class="col-12"><a href="{{ route('sample-orders.index') }}" class="small">Clear filters</a></div>
             </form>
@@ -59,7 +58,7 @@
                                 <th>Order Number</th>
                                 <th>Customer</th>
                                 <th>Collection</th>
-                                <th>Pickup / Delivery</th>
+                                <th>Pickup Date</th>
                                 <th>Return Date</th>
                                 <th>Deposit</th>
                                 <th>Status</th>
@@ -79,8 +78,6 @@
 
                                     <td>
                                         {{ $order->customer_name ?? '-' }}
-                                        @if($order->created_source === 'customer')<div><span class="badge bg-info text-dark mt-1">Customer submitted</span></div>@endif
-                                        @if($order->customer?->phone)<div class="small text-muted">{{ $order->customer->phone }}</div>@endif
                                     </td>
 
                                     <td>
@@ -88,7 +85,7 @@
                                     </td>
 
                                     <td>
-                                        {{ ($order->collection_method === 'lalamove' ? $order->delivery_date : $order->pickup_date)?->format('d M Y') ?? '-' }}
+                                        {{ $order->pickup_date?->format('d M Y') ?? '-' }}
                                     </td>
 
                                     <td>
@@ -96,12 +93,12 @@
                                     </td>
 
                                     <td>
-                                        RM {{ number_format((float) ($order->paid_deposit_amount ?? 0), 2) }}<div class="small text-warning-emphasis">{{ ucfirst($order->deposit_status ?? 'pending') }}</div>
+                                        RM {{ number_format($order->deposit_amount, 2) }}
                                     </td>
 
                                     <td>
                                         <span class="badge {{ $order->status === 'completed' ? 'bg-success' : (in_array($order->status, ['cancelled'], true) ? 'bg-danger' : (in_array($order->status, ['pending','pending_payment'], true) ? 'bg-warning text-dark' : 'bg-primary')) }}">
-                                            {{ $order->collection_method === 'lalamove' && $order->status === 'pending' && $order->deposit_status === 'paid' ? 'Ready for Delivery' : ucwords(str_replace('_', ' ', $order->status)) }}
+                                            {{ ucwords(str_replace('_', ' ', $order->status)) }}
                                         </span>
                                     </td>
 
@@ -147,3 +144,4 @@
 
 </div>
 @endsection
+

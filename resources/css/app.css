@@ -687,8 +687,6 @@ body.authenticated-app::before {
     filter:blur(2.5px);
 }
 body.authenticated-app > .wrapper { position:relative; z-index:auto; }
-/* Keep Bootstrap modals in order forms out of the card hover stacking context. */
-.order-form-card:hover { transform:none; }
 body.authenticated-app .content-wrapper { background:linear-gradient(110deg,rgba(255,255,255,.36),rgba(243,246,252,.28)); }
 
 /* Dashboard reveals trigger once per element as it enters view. */
@@ -824,6 +822,8 @@ body.authenticated-app .page-masthead__pulse { animation:victo-indicator-breathe
     .manual-role-cards article { transition:transform .2s ease, border-color .2s ease, box-shadow .2s ease; }
     .manual-role-cards article:hover { transform:translateY(-2px); border-color:#d2dcf2; box-shadow:0 10px 22px rgba(11,20,49,.07); }
 }
+/* Keep the modal's containing card stationary so Bootstrap can keep the modal fixed. */
+.order-form-card:hover { transform:none; }
 @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
         scroll-behavior:auto !important;
