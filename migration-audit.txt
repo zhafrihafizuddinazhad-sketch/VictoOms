@@ -1,0 +1,506 @@
+﻿
+========== 0001_01_01_000000_create_users_table.php ==========
+
+database\migrations\0001_01_01_000000_create_users_table.php:14:        Schema::create('users', function 
+(Blueprint $table) {
+database\migrations\0001_01_01_000000_create_users_table.php:24:        
+Schema::create('password_reset_tokens', function (Blueprint $table) {
+database\migrations\0001_01_01_000000_create_users_table.php:30:        Schema::create('sessions', 
+function (Blueprint $table) {
+database\migrations\0001_01_01_000000_create_users_table.php:32:            
+$table->foreignId('user_id')->nullable()->index();
+database\migrations\0001_01_01_000000_create_users_table.php:45:        Schema::dropIfExists('users');
+database\migrations\0001_01_01_000000_create_users_table.php:46:        
+Schema::dropIfExists('password_reset_tokens');
+database\migrations\0001_01_01_000000_create_users_table.php:47:        Schema::dropIfExists('sessions');
+
+========== 0001_01_01_000001_create_cache_table.php ==========
+database\migrations\0001_01_01_000001_create_cache_table.php:14:        Schema::create('cache', function 
+(Blueprint $table) {
+database\migrations\0001_01_01_000001_create_cache_table.php:20:        Schema::create('cache_locks', 
+function (Blueprint $table) {
+database\migrations\0001_01_01_000001_create_cache_table.php:32:        Schema::dropIfExists('cache');
+database\migrations\0001_01_01_000001_create_cache_table.php:33:        
+Schema::dropIfExists('cache_locks');
+
+========== 0001_01_01_000002_create_jobs_table.php ==========
+database\migrations\0001_01_01_000002_create_jobs_table.php:14:        Schema::create('jobs', function 
+(Blueprint $table) {
+database\migrations\0001_01_01_000002_create_jobs_table.php:24:        Schema::create('job_batches', 
+function (Blueprint $table) {
+database\migrations\0001_01_01_000002_create_jobs_table.php:37:        Schema::create('failed_jobs', 
+function (Blueprint $table) {
+database\migrations\0001_01_01_000002_create_jobs_table.php:53:        Schema::dropIfExists('jobs');
+database\migrations\0001_01_01_000002_create_jobs_table.php:54:        Schema::dropIfExists('job_batches');
+database\migrations\0001_01_01_000002_create_jobs_table.php:55:        Schema::dropIfExists('failed_jobs');
+
+========== 2026_07_20_060808_create_permission_tables.php ==========
+database\migrations\2026_07_20_060808_create_permission_tables.php:23:        
+Schema::create($tableNames['permissions'], static function (Blueprint $table) {
+database\migrations\2026_07_20_060808_create_permission_tables.php:33:        
+Schema::create($tableNames['roles'], static function (Blueprint $table) use ($teams, $columnNames) {
+database\migrations\2026_07_20_060808_create_permission_tables.php:50:        
+Schema::create($tableNames['model_has_permissions'], static function (Blueprint $table) use ($tableNames, 
+$columnNames, $pivotPermission, $teams) {
+database\migrations\2026_07_20_060808_create_permission_tables.php:74:        
+Schema::create($tableNames['model_has_roles'], static function (Blueprint $table) use ($tableNames, 
+$columnNames, $pivotRole, $teams) {
+database\migrations\2026_07_20_060808_create_permission_tables.php:97:        
+Schema::create($tableNames['role_has_permissions'], static function (Blueprint $table) use ($tableNames, 
+$pivotRole, $pivotPermission) {
+database\migrations\2026_07_20_060808_create_permission_tables.php:128:        
+Schema::drop($tableNames['role_has_permissions']);
+database\migrations\2026_07_20_060808_create_permission_tables.php:129:        
+Schema::drop($tableNames['model_has_roles']);
+database\migrations\2026_07_20_060808_create_permission_tables.php:130:        
+Schema::drop($tableNames['model_has_permissions']);
+database\migrations\2026_07_20_060808_create_permission_tables.php:131:        
+Schema::drop($tableNames['roles']);
+database\migrations\2026_07_20_060808_create_permission_tables.php:132:        
+Schema::drop($tableNames['permissions']);
+
+========== 2026_07_20_060958_add_role_to_users_table.php ==========
+database\migrations\2026_07_20_060958_add_role_to_users_table.php:11:        Schema::table('users', 
+function (Blueprint $table) {
+database\migrations\2026_07_20_060958_add_role_to_users_table.php:12:            $table->enum('role', 
+['owner', 'admin', 'designer'])
+database\migrations\2026_07_20_060958_add_role_to_users_table.php:20:        Schema::table('users', 
+function (Blueprint $table) {
+database\migrations\2026_07_20_060958_add_role_to_users_table.php:21:            
+$table->dropColumn('role');
+
+========== 2026_07_20_093328_create_customers_table.php ==========
+database\migrations\2026_07_20_093328_create_customers_table.php:14:        Schema::create('customers', 
+function (Blueprint $table) {
+database\migrations\2026_07_20_093328_create_customers_table.php:44:        
+Schema::dropIfExists('customers');
+
+========== 2026_07_21_022004_create_orders_table.php ==========
+database\migrations\2026_07_21_022004_create_orders_table.php:14:        Schema::create('orders', function 
+(Blueprint $table) {
+database\migrations\2026_07_21_022004_create_orders_table.php:18:    $table->foreignId('customer_id')
+database\migrations\2026_07_21_022004_create_orders_table.php:26:    $table->enum('status', [
+database\migrations\2026_07_21_022004_create_orders_table.php:45:        Schema::dropIfExists('orders');
+
+========== 2026_07_21_025429_create_order_items_table.php ==========
+database\migrations\2026_07_21_025429_create_order_items_table.php:14:        
+Schema::create('order_items', function (Blueprint $table) {
+database\migrations\2026_07_21_025429_create_order_items_table.php:18:    $table->foreignId('order_id')
+database\migrations\2026_07_21_025429_create_order_items_table.php:40:        
+Schema::dropIfExists('order_items');
+
+========== 2026_07_22_040000_create_designs_table.php ==========
+database\migrations\2026_07_22_040000_create_designs_table.php:14:    Schema::create('designs', function 
+(Blueprint $table) {
+database\migrations\2026_07_22_040000_create_designs_table.php:19:        $table->foreignId('order_id')
+database\migrations\2026_07_22_040000_create_designs_table.php:24:        $table->foreignId('designer_id')
+database\migrations\2026_07_22_040000_create_designs_table.php:47:        Schema::dropIfExists('designs');
+
+========== 2026_07_22_041233_add_designer_id_to_orders_table.php ==========
+database\migrations\2026_07_22_041233_add_designer_id_to_orders_table.php:14:    Schema::table('orders', 
+function (Blueprint $table) {
+database\migrations\2026_07_22_041233_add_designer_id_to_orders_table.php:16:        
+$table->foreignId('designer_id')
+database\migrations\2026_07_22_041233_add_designer_id_to_orders_table.php:27:    Schema::table('orders', 
+function (Blueprint $table) {
+database\migrations\2026_07_22_041233_add_designer_id_to_orders_table.php:31:        
+$table->dropColumn('designer_id');
+
+========== 2026_07_22_065448_update_order_status_enum.php ==========
+database\migrations\2026_07_22_065448_update_order_status_enum.php:14:    DB::statement("
+database\migrations\2026_07_22_065448_update_order_status_enum.php:16:        MODIFY status ENUM(
+database\migrations\2026_07_22_065448_update_order_status_enum.php:37:    DB::statement("
+database\migrations\2026_07_22_065448_update_order_status_enum.php:39:        MODIFY status ENUM(
+
+========== 2026_07_23_030825_create_activity_logs_table.php ==========
+database\migrations\2026_07_23_030825_create_activity_logs_table.php:14:    
+Schema::create('activity_logs', function (Blueprint $table) {
+database\migrations\2026_07_23_030825_create_activity_logs_table.php:18:        
+$table->foreignId('order_id')->constrained()->cascadeOnDelete();
+database\migrations\2026_07_23_030825_create_activity_logs_table.php:20:        
+$table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
+database\migrations\2026_07_23_030825_create_activity_logs_table.php:36:        
+Schema::dropIfExists('activity_logs');
+
+========== 2026_07_24_022218_update_order_status_enum_v2.php ==========
+database\migrations\2026_07_24_022218_update_order_status_enum_v2.php:14:        DB::statement("
+database\migrations\2026_07_24_022218_update_order_status_enum_v2.php:16:            MODIFY status ENUM(
+database\migrations\2026_07_24_022218_update_order_status_enum_v2.php:33:        DB::statement("
+database\migrations\2026_07_24_022218_update_order_status_enum_v2.php:35:            MODIFY status ENUM(
+
+========== 2026_07_24_033332_create_design_files_table.php ==========
+database\migrations\2026_07_24_033332_create_design_files_table.php:14:       
+Schema::create('design_files', function (Blueprint $table) {
+database\migrations\2026_07_24_033332_create_design_files_table.php:18:    
+$table->foreignId('order_id')->constrained()->onDelete('cascade');
+database\migrations\2026_07_24_033332_create_design_files_table.php:20:    
+$table->foreignId('uploaded_by')->constrained('users')->onDelete('cascade');
+database\migrations\2026_07_24_033332_create_design_files_table.php:42:        
+Schema::dropIfExists('design_files');
+
+========== 2026_07_24_092636_add_owner_review_fields_to_orders_table.php ==========
+database\migrations\2026_07_24_092636_add_owner_review_fields_to_orders_table.php:14:    
+Schema::table('orders', function (Blueprint $table) {
+database\migrations\2026_07_24_092636_add_owner_review_fields_to_orders_table.php:18:        
+$table->foreignId('reviewed_by')
+database\migrations\2026_07_24_092636_add_owner_review_fields_to_orders_table.php:33:        
+Schema::table('orders', function (Blueprint $table) {
+
+========== 2026_07_24_093136_update_order_status_enum_v3.php ==========
+database\migrations\2026_07_24_093136_update_order_status_enum_v3.php:15:        DB::statement("
+database\migrations\2026_07_24_093136_update_order_status_enum_v3.php:21:        DB::statement("
+database\migrations\2026_07_24_093136_update_order_status_enum_v3.php:28:        DB::statement("
+database\migrations\2026_07_24_093136_update_order_status_enum_v3.php:30:    MODIFY COLUMN status ENUM(
+database\migrations\2026_07_24_093136_update_order_status_enum_v3.php:50:        DB::statement("
+database\migrations\2026_07_24_093136_update_order_status_enum_v3.php:56:        DB::statement("
+database\migrations\2026_07_24_093136_update_order_status_enum_v3.php:63:        DB::statement("
+database\migrations\2026_07_24_093136_update_order_status_enum_v3.php:65:            MODIFY COLUMN status 
+ENUM(
+
+========== 2026_07_27_071352_add_delivery_method_to_orders_table.php ==========
+database\migrations\2026_07_27_071352_add_delivery_method_to_orders_table.php:14:    
+Schema::table('orders', function (Blueprint $table) {
+database\migrations\2026_07_27_071352_add_delivery_method_to_orders_table.php:16:        
+$table->enum('delivery_method', [
+database\migrations\2026_07_27_071352_add_delivery_method_to_orders_table.php:29:        
+Schema::table('orders', function (Blueprint $table) {
+
+========== 2026_08_05_030513_update_order_status_enum.php ==========
+database\migrations\2026_08_05_030513_update_order_status_enum.php:14:        DB::statement("
+database\migrations\2026_08_05_030513_update_order_status_enum.php:16:            MODIFY status ENUM(
+database\migrations\2026_08_05_030513_update_order_status_enum.php:37:        DB::statement("
+database\migrations\2026_08_05_030513_update_order_status_enum.php:39:            MODIFY status ENUM(
+
+========== 2026_08_05_032242_create_product_photos_table.php ==========
+database\migrations\2026_08_05_032242_create_product_photos_table.php:14:    
+Schema::create('product_photos', function (Blueprint $table) {
+database\migrations\2026_08_05_032242_create_product_photos_table.php:18:        
+$table->foreignId('order_id')
+database\migrations\2026_08_05_032242_create_product_photos_table.php:22:        
+$table->foreignId('uploaded_by')
+database\migrations\2026_08_05_032242_create_product_photos_table.php:42:        
+Schema::dropIfExists('product_photos');
+
+========== 2026_08_05_032317_add_photo_completed_status_to_orders.php ==========
+database\migrations\2026_08_05_032317_add_photo_completed_status_to_orders.php:19:    DB::statement("
+database\migrations\2026_08_05_032317_add_photo_completed_status_to_orders.php:21:        MODIFY status 
+ENUM(
+database\migrations\2026_08_05_032317_add_photo_completed_status_to_orders.php:46:    DB::statement("
+database\migrations\2026_08_05_032317_add_photo_completed_status_to_orders.php:48:        MODIFY status 
+ENUM(
+
+========== 2026_08_06_025830_create_notifications_table.php ==========
+database\migrations\2026_08_06_025830_create_notifications_table.php:14:        
+Schema::create('notifications', function (Blueprint $table) {
+database\migrations\2026_08_06_025830_create_notifications_table.php:18:    
+$table->foreignId('user_id')->constrained()->cascadeOnDelete();
+database\migrations\2026_08_06_025830_create_notifications_table.php:20:    $table->foreignId('order_id')
+database\migrations\2026_08_06_025830_create_notifications_table.php:41:        
+Schema::dropIfExists('notifications');
+
+========== 2026_08_06_083205_add_cameraman_id_to_orders_table.php ==========
+database\migrations\2026_08_06_083205_add_cameraman_id_to_orders_table.php:14:    Schema::table('orders', 
+function (Blueprint $table) {
+database\migrations\2026_08_06_083205_add_cameraman_id_to_orders_table.php:16:        
+$table->foreignId('cameraman_id')
+database\migrations\2026_08_06_083205_add_cameraman_id_to_orders_table.php:29:        
+Schema::table('orders', function (Blueprint $table) {
+
+========== 2026_08_07_033447_create_order_references_table.php ==========
+database\migrations\2026_08_07_033447_create_order_references_table.php:14:        
+Schema::create('order_references', function (Blueprint $table) {
+database\migrations\2026_08_07_033447_create_order_references_table.php:18:    
+$table->foreignId('order_id')
+database\migrations\2026_08_07_033447_create_order_references_table.php:22:    
+$table->foreignId('uploaded_by')
+database\migrations\2026_08_07_033447_create_order_references_table.php:48:        
+Schema::dropIfExists('order_references');
+
+========== 2026_08_07_045300_add_customer_brief_to_orders_table.php ==========
+database\migrations\2026_08_07_045300_add_customer_brief_to_orders_table.php:14:    
+Schema::table('orders', function (Blueprint $table) {
+database\migrations\2026_08_07_045300_add_customer_brief_to_orders_table.php:25:    
+Schema::table('orders', function (Blueprint $table) {
+database\migrations\2026_08_07_045300_add_customer_brief_to_orders_table.php:27:        
+$table->dropColumn('customer_brief');
+
+========== 2026_08_17_020318_recreate_sessions_table.php ==========
+database\migrations\2026_08_17_020318_recreate_sessions_table.php:15:        Schema::create('sessions', 
+function (Blueprint $table) {
+database\migrations\2026_08_17_020318_recreate_sessions_table.php:17:            
+$table->foreignId('user_id')->nullable()->index();
+database\migrations\2026_08_17_020318_recreate_sessions_table.php:27:        
+Schema::dropIfExists('sessions');
+
+========== 2026_08_18_062114_create_products_table.php ==========
+database\migrations\2026_08_18_062114_create_products_table.php:11:        Schema::create('products', 
+function (Blueprint $table) {
+database\migrations\2026_08_18_062114_create_products_table.php:34:        
+Schema::dropIfExists('products');
+
+========== 2026_08_19_022726_add_repeat_order_fields_to_orders_table.php ==========
+database\migrations\2026_08_19_022726_add_repeat_order_fields_to_orders_table.php:11:        
+Schema::table('orders', function (Blueprint $table) {
+database\migrations\2026_08_19_022726_add_repeat_order_fields_to_orders_table.php:17:            
+$table->foreignId('repeat_from_order_id')
+database\migrations\2026_08_19_022726_add_repeat_order_fields_to_orders_table.php:32:        
+Schema::table('orders', function (Blueprint $table) {
+database\migrations\2026_08_19_022726_add_repeat_order_fields_to_orders_table.php:38:            
+$table->dropColumn([
+
+========== 2026_08_19_034656_create_job_orders_table.php ==========
+database\migrations\2026_08_19_034656_create_job_orders_table.php:11:        Schema::create('job_orders', 
+function (Blueprint $table) {
+database\migrations\2026_08_19_034656_create_job_orders_table.php:15:            
+$table->foreignId('order_id')
+database\migrations\2026_08_19_034656_create_job_orders_table.php:22:            
+$table->foreignId('created_by')
+database\migrations\2026_08_19_034656_create_job_orders_table.php:52:        
+Schema::dropIfExists('job_orders');
+
+========== 2026_08_19_034814_create_job_order_items_table.php ==========
+database\migrations\2026_08_19_034814_create_job_order_items_table.php:11:        
+Schema::create('job_order_items', function (Blueprint $table) {
+database\migrations\2026_08_19_034814_create_job_order_items_table.php:15:            
+$table->foreignId('job_order_id')
+database\migrations\2026_08_19_034814_create_job_order_items_table.php:33:        
+Schema::dropIfExists('job_order_items');
+
+========== 2026_08_20_021646_add_name_to_job_order_items_table.php ==========
+database\migrations\2026_08_20_021646_add_name_to_job_order_items_table.php:11:        
+Schema::table('job_order_items', function (Blueprint $table) {
+database\migrations\2026_08_20_021646_add_name_to_job_order_items_table.php:18:        
+Schema::table('job_order_items', function (Blueprint $table) {
+database\migrations\2026_08_20_021646_add_name_to_job_order_items_table.php:19:            
+$table->dropColumn('name');
+
+========== 2026_08_20_023406_add_number_to_job_order_items_table.php ==========
+database\migrations\2026_08_20_023406_add_number_to_job_order_items_table.php:11:        
+Schema::table('job_order_items', function (Blueprint $table) {
+database\migrations\2026_08_20_023406_add_number_to_job_order_items_table.php:20:        
+Schema::table('job_order_items', function (Blueprint $table) {
+database\migrations\2026_08_20_023406_add_number_to_job_order_items_table.php:21:            
+$table->dropColumn('number');
+
+========== 2026_08_20_065733_add_image_fields_to_job_orders_table.php ==========
+database\migrations\2026_08_20_065733_add_image_fields_to_job_orders_table.php:11:        
+Schema::table('job_orders', function (Blueprint $table) {
+database\migrations\2026_08_20_065733_add_image_fields_to_job_orders_table.php:26:        
+Schema::table('job_orders', function (Blueprint $table) {
+database\migrations\2026_08_20_065733_add_image_fields_to_job_orders_table.php:28:            
+$table->dropColumn([
+
+========== 2026_08_27_104243_create_job_order_images_table.php ==========
+database\migrations\2026_08_27_104243_create_job_order_images_table.php:11:        
+Schema::create('job_order_images', function (Blueprint $table) {
+database\migrations\2026_08_27_104243_create_job_order_images_table.php:15:            
+$table->foreignId('job_order_id')
+database\migrations\2026_08_27_104243_create_job_order_images_table.php:30:        
+Schema::dropIfExists('job_order_images');
+
+========== 2026_09_18_124431_add_profile_fields_to_users_table.php ==========
+database\migrations\2026_09_18_124431_add_profile_fields_to_users_table.php:14:        
+Schema::table('users', function (Blueprint $table) {
+database\migrations\2026_09_18_124431_add_profile_fields_to_users_table.php:30:        
+Schema::table('users', function (Blueprint $table) {
+database\migrations\2026_09_18_124431_add_profile_fields_to_users_table.php:32:            
+$table->dropColumn([
+
+========== 2026_09_22_144126_add_account_status_to_users_table.php ==========
+database\migrations\2026_09_22_144126_add_account_status_to_users_table.php:14:        
+Schema::table('users', function (Blueprint $table) {
+database\migrations\2026_09_22_144126_add_account_status_to_users_table.php:26:        
+Schema::table('users', function (Blueprint $table) {
+database\migrations\2026_09_22_144126_add_account_status_to_users_table.php:27:            
+$table->dropColumn('account_status');
+
+========== 2026_09_29_140538_create_sample_orders_table.php ==========
+database\migrations\2026_09_29_140538_create_sample_orders_table.php:14:        
+Schema::create('sample_orders', function (Blueprint $table) {
+database\migrations\2026_09_29_140538_create_sample_orders_table.php:18:    
+$table->foreignId('customer_id')
+database\migrations\2026_09_29_140538_create_sample_orders_table.php:26:    
+$table->enum('collection_method', [
+database\migrations\2026_09_29_140538_create_sample_orders_table.php:37:    $table->enum('deposit_status', 
+[
+database\migrations\2026_09_29_140538_create_sample_orders_table.php:45:    $table->enum('status', [
+database\migrations\2026_09_29_140538_create_sample_orders_table.php:73:        
+Schema::dropIfExists('sample_orders');
+
+========== 2026_09_29_140639_create_samples_table.php ==========
+database\migrations\2026_09_29_140639_create_samples_table.php:14:        Schema::create('samples', 
+function (Blueprint $table) {
+database\migrations\2026_09_29_140639_create_samples_table.php:21:    $table->enum('item_type', [
+database\migrations\2026_09_29_140639_create_samples_table.php:31:    $table->enum('status', [
+database\migrations\2026_09_29_140639_create_samples_table.php:50:        Schema::dropIfExists('samples');
+
+========== 2026_09_29_140654_create_sample_items_table.php ==========
+database\migrations\2026_09_29_140654_create_sample_items_table.php:14:        
+Schema::create('sample_items', function (Blueprint $table) {
+database\migrations\2026_09_29_140654_create_sample_items_table.php:18:    
+$table->foreignId('sample_order_id')
+database\migrations\2026_09_29_140654_create_sample_items_table.php:23:    $table->foreignId('sample_id')
+database\migrations\2026_09_29_140654_create_sample_items_table.php:29:    $table->enum('item_type', [
+database\migrations\2026_09_29_140654_create_sample_items_table.php:49:        
+Schema::dropIfExists('sample_items');
+
+========== 2026_09_29_140837_create_payments_table.php ==========
+database\migrations\2026_09_29_140837_create_payments_table.php:14:        Schema::create('payments', 
+function (Blueprint $table) {
+database\migrations\2026_09_29_140837_create_payments_table.php:18:    $table->foreignId('sample_order_id')
+database\migrations\2026_09_29_140837_create_payments_table.php:25:    $table->enum('payment_method', [
+database\migrations\2026_09_29_140837_create_payments_table.php:31:    $table->enum('status', [
+database\migrations\2026_09_29_140837_create_payments_table.php:41:    $table->foreignId('confirmed_by')
+database\migrations\2026_09_29_140837_create_payments_table.php:57:        
+Schema::dropIfExists('payments');
+
+========== 2026_09_29_140945_create_sample_photos_table.php ==========
+database\migrations\2026_09_29_140945_create_sample_photos_table.php:14:        
+Schema::create('sample_photos', function (Blueprint $table) {
+database\migrations\2026_09_29_140945_create_sample_photos_table.php:18:    
+$table->foreignId('sample_order_id')
+database\migrations\2026_09_29_140945_create_sample_photos_table.php:23:    $table->enum('photo_type', [
+database\migrations\2026_09_29_140945_create_sample_photos_table.php:31:    
+$table->foreignId('uploaded_by_user_id')
+database\migrations\2026_09_29_140945_create_sample_photos_table.php:53:        
+Schema::dropIfExists('sample_photos');
+
+========== 2026_09_29_142740_add_sample_order_id_to_payments_table.php ==========
+database\migrations\2026_09_29_142740_add_sample_order_id_to_payments_table.php:15:        
+Schema::table('payments', function (Blueprint $table) {
+database\migrations\2026_09_29_142740_add_sample_order_id_to_payments_table.php:16:            
+$table->foreignId('sample_order_id')
+database\migrations\2026_09_29_142740_add_sample_order_id_to_payments_table.php:30:        
+Schema::table('payments', function (Blueprint $table) {
+database\migrations\2026_09_29_142740_add_sample_order_id_to_payments_table.php:32:            
+$table->dropColumn('sample_order_id');
+
+========== 2026_09_29_142826_create_sample_returns_table.php ==========
+database\migrations\2026_09_29_142826_create_sample_returns_table.php:11:        
+Schema::create('sample_returns', function (Blueprint $table) {
+database\migrations\2026_09_29_142826_create_sample_returns_table.php:14:            
+$table->foreignId('sample_order_id')
+database\migrations\2026_09_29_142826_create_sample_returns_table.php:20:            
+$table->foreignId('received_by')
+database\migrations\2026_09_29_142826_create_sample_returns_table.php:25:            
+$table->enum('condition', [
+database\migrations\2026_09_29_142826_create_sample_returns_table.php:33:            
+$table->enum('deposit_action', [
+database\migrations\2026_09_29_142826_create_sample_returns_table.php:47:        
+Schema::dropIfExists('sample_returns');
+
+========== 2026_09_29_151352_change_customer_id_to_customer_name_on_sample_orders_table.php ==========
+database\migrations\2026_09_29_151352_change_customer_id_to_customer_name_on_sample_orders_table.php:14:   
+     Schema::table('sample_orders', function (Blueprint $table) {
+database\migrations\2026_09_29_151352_change_customer_id_to_customer_name_on_sample_orders_table.php:18:   
+         $table->dropColumn('customer_id');
+database\migrations\2026_09_29_151352_change_customer_id_to_customer_name_on_sample_orders_table.php:30:   
+     Schema::table('sample_orders', function (Blueprint $table) {
+database\migrations\2026_09_29_151352_change_customer_id_to_customer_name_on_sample_orders_table.php:33:   
+         $table->dropColumn('customer_name');
+database\migrations\2026_09_29_151352_change_customer_id_to_customer_name_on_sample_orders_table.php:36:   
+         $table->foreignId('customer_id')
+
+========== 2026_09_30_000001_expand_sample_photo_checkpoints.php ==========
+database\migrations\2026_09_30_000001_expand_sample_photo_checkpoints.php:22:        
+Schema::table('sample_photos', function (Blueprint $table): void {
+database\migrations\2026_09_30_000001_expand_sample_photo_checkpoints.php:23:            
+$table->enum('photo_type', $this->checkpoints)->change();
+database\migrations\2026_09_30_000001_expand_sample_photo_checkpoints.php:40:        
+Schema::table('sample_photos', function (Blueprint $table): void {
+database\migrations\2026_09_30_000001_expand_sample_photo_checkpoints.php:41:            
+$table->enum('photo_type', [
+database\migrations\2026_09_30_000001_expand_sample_photo_checkpoints.php:46:            ])->change();
+
+========== 2026_09_30_152724_add_payment_fields_to_payments_table.php ==========
+database\migrations\2026_09_30_152724_add_payment_fields_to_payments_table.php:11:        
+Schema::table('payments', function (Blueprint $table) {
+database\migrations\2026_09_30_152724_add_payment_fields_to_payments_table.php:25:                
+$table->foreignId('confirmed_by')
+database\migrations\2026_09_30_152724_add_payment_fields_to_payments_table.php:39:        
+Schema::table('payments', function (Blueprint $table) {
+database\migrations\2026_09_30_152724_add_payment_fields_to_payments_table.php:42:            
+$table->dropColumn([
+
+========== 2026_10_01_000002_extend_sample_return_inspection_options.php ==========
+database\migrations\2026_10_01_000002_extend_sample_return_inspection_options.php:12:        
+Schema::table('sample_returns', function (Blueprint $table): void {
+database\migrations\2026_10_01_000002_extend_sample_return_inspection_options.php:13:            
+$table->enum('condition', ['good', 'damaged', 'lost', 'other'])->default('good')->change();
+database\migrations\2026_10_01_000002_extend_sample_return_inspection_options.php:14:            
+$table->enum('deposit_action', ['refund', 'partial_refund', 'forfeit', 'deduct', 
+'hold'])->nullable()->change();
+database\migrations\2026_10_01_000002_extend_sample_return_inspection_options.php:25:        
+Schema::table('sample_returns', function (Blueprint $table): void {
+database\migrations\2026_10_01_000002_extend_sample_return_inspection_options.php:26:            
+$table->enum('condition', ['good', 'damaged', 'lost'])->default('good')->change();
+database\migrations\2026_10_01_000002_extend_sample_return_inspection_options.php:27:            
+$table->enum('deposit_action', ['refund', 'partial_refund', 'forfeit'])->nullable()->change();
+
+========== 2026_10_01_132628_add_original_to_sample_photo_type_enum.php ==========
+database\migrations\2026_10_01_132628_add_original_to_sample_photo_type_enum.php:14:        
+Schema::table('sample_photos', function (Blueprint $table) {
+database\migrations\2026_10_01_132628_add_original_to_sample_photo_type_enum.php:15:            
+$table->enum('photo_type', [
+database\migrations\2026_10_01_132628_add_original_to_sample_photo_type_enum.php:23:            
+])->change();
+database\migrations\2026_10_01_132628_add_original_to_sample_photo_type_enum.php:32:        
+Schema::table('sample_photos', function (Blueprint $table) {
+database\migrations\2026_10_01_132628_add_original_to_sample_photo_type_enum.php:33:            
+$table->enum('photo_type', [
+database\migrations\2026_10_01_132628_add_original_to_sample_photo_type_enum.php:40:            
+])->change();
+
+========== 2026_10_01_150000_add_customer_request_fields_to_sample_orders.php ==========
+database\migrations\2026_10_01_150000_add_customer_request_fields_to_sample_orders.php:11:        
+Schema::table('sample_orders', function (Blueprint $table) {
+database\migrations\2026_10_01_150000_add_customer_request_fields_to_sample_orders.php:12:            $tabl
+e->foreignId('customer_id')->nullable()->after('customer_name')->constrained('customers')->nullOnDelete();
+database\migrations\2026_10_01_150000_add_customer_request_fields_to_sample_orders.php:21:        
+Schema::table('sample_orders', function (Blueprint $table) {
+database\migrations\2026_10_01_150000_add_customer_request_fields_to_sample_orders.php:23:            
+$table->dropColumn(['customer_id', 'delivery_date', 'delivery_address', 'created_source']);
+
+========== 2026_10_02_000001_create_sample_order_events_table.php ==========
+database\migrations\2026_10_02_000001_create_sample_order_events_table.php:11:        
+Schema::create('sample_order_events', function (Blueprint $table) {
+database\migrations\2026_10_02_000001_create_sample_order_events_table.php:13:            
+$table->foreignId('sample_order_id')->constrained('sample_orders')->cascadeOnDelete();
+database\migrations\2026_10_02_000001_create_sample_order_events_table.php:14:            
+$table->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete();
+database\migrations\2026_10_02_000001_create_sample_order_events_table.php:23:        
+Schema::dropIfExists('sample_order_events');
+
+========== 2026_10_05_000001_add_others_sample_item_fields.php ==========
+database\migrations\2026_10_05_000001_add_others_sample_item_fields.php:12:        
+Schema::table('sample_items', function (Blueprint $table): void {
+database\migrations\2026_10_05_000001_add_others_sample_item_fields.php:13:            
+$table->enum('item_type', ['shirt', 'short', 'others'])->change();
+database\migrations\2026_10_05_000001_add_others_sample_item_fields.php:24:        
+Schema::table('sample_items', function (Blueprint $table): void {
+database\migrations\2026_10_05_000001_add_others_sample_item_fields.php:25:            
+$table->dropColumn('sample_name');
+database\migrations\2026_10_05_000001_add_others_sample_item_fields.php:26:            
+$table->enum('item_type', ['shirt', 'short'])->change();
+
+========== 2026_10_06_000001_add_completed_at_to_sample_orders_table.php ==========
+database\migrations\2026_10_06_000001_add_completed_at_to_sample_orders_table.php:12:            
+Schema::table('sample_orders', function (Blueprint $table): void {
+database\migrations\2026_10_06_000001_add_completed_at_to_sample_orders_table.php:22:            
+Schema::table('sample_orders', function (Blueprint $table): void {
+database\migrations\2026_10_06_000001_add_completed_at_to_sample_orders_table.php:24:                
+$table->dropColumn('completed_at');
+
+========== 2026_10_06_000001_allow_system_activity_logs.php ==========
+database\migrations\2026_10_06_000001_allow_system_activity_logs.php:12:        
+Schema::table('activity_logs', function (Blueprint $table) {
+database\migrations\2026_10_06_000001_allow_system_activity_logs.php:13:            
+$table->foreignId('order_id')->nullable()->change();
+database\migrations\2026_10_06_000001_allow_system_activity_logs.php:21:        
+Schema::table('activity_logs', function (Blueprint $table) {
+database\migrations\2026_10_06_000001_allow_system_activity_logs.php:22:            
+$table->foreignId('order_id')->nullable(false)->change();
+
+========== 2026_10_06_000002_backfill_sample_order_completed_at_from_events.php ==========
+
+
